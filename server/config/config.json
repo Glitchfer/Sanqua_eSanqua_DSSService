@@ -1,0 +1,83 @@
+{
+  "localhost": {
+    "appPort": 4190,
+    "applicationId": 99,
+    "applicationCode": "RECT",
+    "applicationName": "Recruitment",
+    "username": "postgres",
+    "password": "P455uu0rd^^ok",
+    "database": "sanqua_recruitmentdb",
+    "host": "10.10.20.5",
+    "port": 5432,
+    "logging": true,
+    "dialect": "postgres",
+    "dialectOptions": {
+      "dateStrings": true,
+      "typeCast": true,
+      "useUTC": false,
+      "charset": "utf8mb4_unicode_ci"
+    },
+    "timezone": "Asia/Jakarta",
+
+    "token_expire": "7",
+    "token_expire_unit": "day",
+    "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
+
+    "cryptoKey": {
+      "md5Key": "4B1C9E44D769C429",
+      "hashKey": "51beba089ef1612152be4933ea6a9a48"
+    },
+
+    "frontParam": {
+      "separatorData": "Þ"
+    },
+
+    "api": {
+      "notification": {
+        "notificationTemplate": "http://localhost:1189/api/oauth/v1/notification_template/detail/code",
+        "fcmSend": "http://localhost:1190/api/fcm/v1/send"
+      },
+
+      "oAuth": {
+        "url": {
+          "base": "http://localhost:9189/api/oauth/v1",
+          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
+          "approval_matrix_document": {
+            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email",
+            "save_manual": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save_manual"
+          },
+          "userInfo": "http://localhost:9189/api/oauth/v1/user/e/"
+        }
+      },
+      "hr": {
+        "url": {
+          "employeeInfo": "http://localhost:8189/api/hr/v1/employee"
+        }
+      },
+
+      "catalogue": "http://localhost:9191/",
+      "eSanqua": "http://localhost:2193/api/esanqua/v1",
+
+      "logging": {
+        "url": "http://localhost:8191/api/esanqua/log/v1/hris"
+      }
+    },
+    "fileBasePath": "/var/www/sqa_upload_ecatalogue/recruitment",
+    "fileUrl": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue/recruitment",
+    "hqId": 6,
+    "source": ["portal", "esanqua"],
+    "google": {
+      "firebase": null,
+      "reCaptcha": {
+        "verificationUrl": "https://www.google.com/recaptcha/api/siteverify",
+        "siteKeyV2": "6LfNPZsqAAAAAI30mm3L-pStTRRC6JSiSrR0dkh0",
+        "secretKeyV2": "6LfNPZsqAAAAAMwmGA8-YhqG8fBLzbl1RlPHczsL",
+        "siteKeyV3": "6Ld-cpoqAAAAAKgSokuapBglgDPH94DA5u4zXAaK",
+        "secretKeyV3": "6Ld-cpoqAAAAAMhlHwtWG7eDcOTQeRBfB6JhPEu0"
+      }
+    }
+  }
+}
