@@ -1,12 +1,11 @@
 {
   "localhost": {
-    "appPort": 4190,
-    "applicationId": 99,
-    "applicationCode": "RECT",
-    "applicationName": "Recruitment",
+    "appPort": 5190,
+    "applicationId": 23,
+    "applicationCode": "DSS",
     "username": "postgres",
     "password": "P455uu0rd^^ok",
-    "database": "sanqua_recruitmentdb",
+    "database": "sanqua_dssdb",
     "host": "10.10.20.5",
     "port": 5432,
     "logging": true,
@@ -18,9 +17,6 @@
       "charset": "utf8mb4_unicode_ci"
     },
     "timezone": "Asia/Jakarta",
-
-    "token_expire": "7",
-    "token_expire_unit": "day",
     "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
 
     "cryptoKey": {
@@ -33,11 +29,6 @@
     },
 
     "api": {
-      "notification": {
-        "notificationTemplate": "http://localhost:1189/api/oauth/v1/notification_template/detail/code",
-        "fcmSend": "http://localhost:1190/api/fcm/v1/send"
-      },
-
       "oAuth": {
         "url": {
           "base": "http://localhost:9189/api/oauth/v1",
@@ -65,19 +56,16 @@
         "url": "http://localhost:8191/api/esanqua/log/v1/hris"
       }
     },
-    "fileBasePath": "/var/www/sqa_upload_ecatalogue/recruitment",
-    "fileUrl": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue/recruitment",
+    "fileBasePath": "/var/www/sqa_upload_ecatalogue/dss",
+    "fileUrl": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue/dss",
     "hqId": 6,
     "source": ["portal", "esanqua"],
-    "google": {
-      "firebase": null,
-      "reCaptcha": {
-        "verificationUrl": "https://www.google.com/recaptcha/api/siteverify",
-        "siteKeyV2": "6LfNPZsqAAAAAI30mm3L-pStTRRC6JSiSrR0dkh0",
-        "secretKeyV2": "6LfNPZsqAAAAAMwmGA8-YhqG8fBLzbl1RlPHczsL",
-        "siteKeyV3": "6Ld-cpoqAAAAAKgSokuapBglgDPH94DA5u4zXAaK",
-        "secretKeyV3": "6Ld-cpoqAAAAAMhlHwtWG7eDcOTQeRBfB6JhPEu0"
-      }
+    "statusDescription": {
+      "auditDocument": ["Draft"],
+      "performanceReport": ["Draft"],
+      "initialReport": ["Draft"],
+      "inspectionReport": ["Draft"],
+      "rootCause": ["Draft"]
     }
   }
 }
