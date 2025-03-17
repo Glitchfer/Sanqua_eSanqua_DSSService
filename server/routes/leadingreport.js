@@ -1,0 +1,59 @@
+const _leadingReport = require("../controllers").leadingreport;
+
+const { check, validationResult } = require("express-validator");
+var _rootAPIPath = "/api/esanqua/dss/v1/leadingreport";
+
+module.exports = (app) => {
+	app.get(_rootAPIPath, (req, res) =>
+		res.status(200).send({
+			message: 'Welcome to the Todos API!'
+		})
+	);
+
+	app.use(function(req, res, next) {
+		res.header('Access-Control-Allow-Origin', '*'); // update to match the domain you will make the request from
+		res.header(
+			'Access-Control-Allow-Headers',
+			'Origin, X-Requested-With, Content-Type, Accept, x-method, x-token, x-application-id'
+		);
+		next();
+	});
+
+	var arrValidate = [];
+
+	arrValidate = [];
+	arrValidate = [
+		check('act').not().isEmpty().withMessage('Parameter action can not be empty'),
+		check('company_id', 'Parameter company_id can not be empty and must be integer').not().isEmpty().isInt(),
+		check('company_name').not().isEmpty().withMessage('Parameter company_name can not be empty'),
+		check('leading_date').not().isEmpty().withMessage('Parameter incident_date can not be empty')
+	];
+	app.post(_rootAPIPath + '/save', arrValidate, _leadingReport.save);
+
+	arrValidate = [];
+	arrValidate = [
+		check('limit', 'Parameter limit can not be empty and must be integer').not().isEmpty().isInt(),
+		check('offset', 'Parameter offset can not be empty and must be integer').not().isEmpty().isInt()
+	];
+	app.get(_rootAPIPath + '/list', arrValidate, _leadingReport.list);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id can not be empty') ];
+	app.get(_rootAPIPath + '/detail/:id', arrValidate, _leadingReport.getById);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id can not be empty') ];
+	app.post(_rootAPIPath + '/submit', arrValidate, _leadingReport.submit);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id can not be empty') ];
+	app.post(_rootAPIPath + '/cancel', arrValidate, _leadingReport.cancel);
+
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id can not be empty') ];
+	app.post(_rootAPIPath + '/set_to_draft', arrValidate, _leadingReport.setToDraft);
+	
+	arrValidate = [];
+	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id can not be empty') ];
+	app.delete(_rootAPIPath + "/delete/:id", arrValidate, _leadingReport.deleteReport);
+};

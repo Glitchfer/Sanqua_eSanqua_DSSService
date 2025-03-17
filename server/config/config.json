@@ -31,26 +31,26 @@
     "api": {
       "oAuth": {
         "url": {
-          "base": "http://localhost:9189/api/oauth/v1",
-          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
+          "base": "http://10.10.20.5:9189/api/oauth/v1",
+          "verifyToken": "http://10.10.20.5:9189/api/oauth/v1/user/verify_token",
           "approval_matrix_document": {
-            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
-            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
-            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
-            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email",
-            "save_manual": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save_manual"
+            "save": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/confirm_via_email",
+            "save_manual": "http://10.10.20.5:9189/api/oauth/v1/approval_matrix/document/save_manual"
           },
-          "userInfo": "http://localhost:9189/api/oauth/v1/user/e/"
+          "userInfo": "http://10.10.20.5:9189/api/oauth/v1/user/e/"
         }
       },
       "hr": {
         "url": {
-          "employeeInfo": "http://localhost:8189/api/hr/v1/employee"
+          "employeeInfo": "http://10.10.20.5:8189/api/hr/v1/employee"
         }
       },
 
-      "catalogue": "http://localhost:9191/",
-      "eSanqua": "http://localhost:2193/api/esanqua/v1",
+      "catalogue": "http://10.10.20.5:9191/",
+      "eSanqua": "http://10.10.20.5:2193/api/esanqua/v1",
 
       "logging": {
         "url": "http://localhost:8191/api/esanqua/log/v1/hris"
@@ -61,11 +61,19 @@
     "hqId": 6,
     "source": ["portal", "esanqua"],
     "statusDescription": {
-      "auditDocument": ["Draft"],
-      "performanceReport": ["Draft"],
-      "initialReport": ["Draft"],
-      "inspectionReport": ["Draft"],
-      "rootCause": ["Draft"]
+      "auditDocument": ["Draft", "Waiting Approval", "In Progress", "Done", "Cancel", "Reject"],
+      "auditItemScore": ["Draft", "In Progress", "Verified", "Cancel", "Unused"],
+      "performanceReport": ["Draft", "Waiting Approval", "Done", "Cancel", "Reject"],
+      "initialReport": ["Draft", "Submitted", "Cancel"],
+      "inspectionReport": ["Draft", "Submitted", "Cancel"],
+      "rootCauseReport": ["Draft", "Submitted", "Cancel"],
+      "leadingReport": ["Draft", "Submitted", "Cancel"]
+    },
+    "approvalMatrixConfig": {
+      "tableName": {
+        "auditDocument": "tr_audits",
+        "performanceReport": "tr_performancereports"
+      }
     }
   }
 }
