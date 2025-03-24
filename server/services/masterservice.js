@@ -67,6 +67,7 @@ class MasterService {
     var _repoInstance = new MasterRepository(pParam.model, pParam.app);
 
     var xResultList = await _repoInstance.list(pParam);
+    // console.log(`MASTER LIST>>>>>>>>>, ${JSON.stringify(xResultList)}`);
 
     if (xResultList.status_code == "00") {
       if (xResultList.data.count > 0) {
@@ -79,11 +80,12 @@ class MasterService {
           );
           xJoArrData.push(xJoList);
         }
+        // console.log(`total_record>>>>>>>>>, ${JSON.stringify(xResultList)}`);
         xJoResult = {
           status_code: "00",
           status_msg: "OK",
           data: xJoArrData,
-          total_record: xResultList.data.total_record,
+          total_record: xResultList.total_record,
         };
       } else {
         xJoResult = {
@@ -115,6 +117,20 @@ class MasterService {
               id: xRows[index].id,
               name: xRows[index].name,
               value: xRows[index].value,
+            });
+          } else if (pParam.model == "clause") {
+            xJoArrData.push({
+              id: xRows[index].id,
+              description: xRows[index].description,
+              clause_no: xRows[index].clause_no,
+              reference: xRows[index].reference,
+              clause_category:
+                xRows[index].clause_category != null
+                  ? {
+                      id: xRows[index].clause_category.id,
+                      name: xRows[index].clause_category.name,
+                    }
+                  : null,
             });
           } else {
             xJoArrData.push({
@@ -182,7 +198,7 @@ class MasterService {
           }
         }
 
-        console.log(`pParam>>>>>>: ${JSON.stringify(pParam)}`);
+        // console.log(`pParam>>>>>>: ${JSON.stringify(pParam)}`);
         // Check if data exists by name or code
         if (pParam.hasOwnProperty("is_check")) {
           if (pParam.is_check) {
@@ -213,15 +229,15 @@ class MasterService {
             xJoResult = xAddResult;
           }
         } else {
-          var msg = ''
+          var msg = "";
           if (xExistingData.name.toLowerCase() == pParam.name.toLowerCase()) {
-            msg = msg + `name: "${pParam.name}"`
+            msg = msg + `name: "${pParam.name}"`;
           }
           if (xExistingData.code.toLowerCase() == pParam.code.toLowerCase()) {
             if (xExistingData.name.toLowerCase() == pParam.name.toLowerCase()) {
-              msg = msg + ' or '
+              msg = msg + " or ";
             }
-            msg = msg + `code: "${pParam.code}"`
+            msg = msg + `code: "${pParam.code}"`;
           }
 
           xJoResult = {
@@ -230,7 +246,7 @@ class MasterService {
           };
         }
       } else if (xAct == "update") {
-        console.log(JSON.stringify(pParam));
+        // console.log(JSON.stringify(pParam));
 
         var xDecId = await _utilInstance.decrypt(
           pParam.id,
@@ -255,8 +271,8 @@ class MasterService {
         }
 
         if (xFlagProcess) {
-          var xCheckID = await _repoInstance.getById(pParam)
-          if (xCheckID.status_code == '00') {
+          var xCheckID = await _repoInstance.getById(pParam);
+          if (xCheckID.status_code == "00") {
             var xAddResult = await _repoInstance.save(pParam, xAct);
             xJoResult = xAddResult;
           } else {

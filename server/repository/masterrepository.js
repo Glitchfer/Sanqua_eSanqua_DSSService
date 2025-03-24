@@ -139,10 +139,22 @@ class MasterRepository {
           pParam.filter != ""
         ) {
           var xFilter = JSON.parse(pParam.filter);
+          // console.log(`xFilter ${JSON.stringify(xFilter)}`);
           if (xFilter.length > 0) {
             // xWhereAnd.push( pParam.filter );
             for (var index in xFilter) {
-              xWhereAnd.push(xFilter[index]);
+              var objProperty = Object.getOwnPropertyNames(xFilter[index])[0];
+              if (objProperty.includes("_ids")) {
+                xWhereAnd.push({
+                  [objProperty]: {
+                    [Op.contains]: Sequelize.literal(
+                      `ARRAY[${xFilter[index][objProperty]}]`
+                    ),
+                  },
+                });
+              } else {
+                xWhereAnd.push(xFilter[index]);
+              }
             }
           }
         }
@@ -183,11 +195,73 @@ class MasterRepository {
       // console.log(`>>> pParam.keyword: ${pParam.keyword}`);
       if (pParam.hasOwnProperty("keyword")) {
         if (pParam.keyword != "" && pParam.keyword != null) {
-          xWhereOr.push({
-            name: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
-            },
-          });
+          var xWhereKeyword = [];
+          if (pParam.model == "clause") {
+            xWhereOr.push(
+              {
+                description: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              },
+              {
+                reference: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              },
+              {
+                clause_no: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              },
+              {
+                "$clause_category.name$": {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              }
+            );
+          } else if (
+            pParam.model == "area" ||
+            pParam.model == "scope" ||
+            pParam.model == "audittype" ||
+            pParam.model == "bodypart" ||
+            pParam.model == "injuredcategory" ||
+            pParam.model == "objectcategory" ||
+            pParam.model == "clausecategory"
+          ) {
+            xWhereOr.push(
+              {
+                name: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              },
+              {
+                code: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              }
+            );
+          } else {
+            xWhereOr.push(
+              {
+                name: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              },
+              {
+                code: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              },
+              {
+                description: {
+                  [Op.iLike]: "%" + pParam.keyword + "%",
+                },
+              }
+            );
+          }
+          for (let i = 0; i < xWhereKeyword.length; i++) {
+            xWhereOr.push(xWhereKeyword[i]);
+          }
         }
       }
 
@@ -262,6 +336,26 @@ class MasterRepository {
       var xSaved = null;
       xTransaction = await sequelize.transaction();
 
+      var objProperty = Object.getOwnPropertyNames(pParam);
+      for (let i = 0; i < objProperty.length; i++) {
+        if (objProperty[i].includes("_ids")) {
+          // console.log(`objName>>>>>>>> ${JSON.stringify(objProperty[i])}`);
+          // console.log(
+          //   `objValue>>>>>>>> ${JSON.stringify(pParam[objProperty[i]])}`
+          // );
+          if (
+            pParam[objProperty[i]] != null &&
+            pParam[objProperty[i]].length > 0
+          ) {
+            pParam[objProperty[i]] = Sequelize.literal(
+              `ARRAY[${pParam[objProperty[i]].join(",")}]`
+            );
+          } else {
+            pParam[objProperty[i]] = null;
+          }
+        }
+      }
+      // console.log(`pParam>>>>>>>> ${JSON.stringify(pParam)}`);
       if (pAct == "add") {
         pParam.status = 1;
         pParam.is_delete = 0;
@@ -375,7 +469,7 @@ class MasterRepository {
     var xWhere = [];
     var xWhereOr = [];
     var xWhereAnd = [];
-    
+
     if (pFilter) {
       if (pFilter.length > 0) {
         for (var i in pFilter) {
@@ -389,15 +483,15 @@ class MasterRepository {
     xWhereOr.push({
       name: {
         [Op.iLike]: "%" + pName + "%",
-      }
+      },
     });
 
     if (pCode != undefined && pCode != null && pCode != "") {
       xWhereOr.push({
         code: {
           [Op.iLike]: "%" + pCode + "%",
-        }
-      })
+        },
+      });
     }
 
     if (xWhereAnd.length > 0) {
@@ -418,7 +512,7 @@ class MasterRepository {
 
     return data;
   }
-  
+
   async archive(pParam) {
     let xTransaction;
     var xJoResult = {};

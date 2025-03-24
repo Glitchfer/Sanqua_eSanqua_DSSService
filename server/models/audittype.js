@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
       },
       name: DataTypes.STRING,
+      code: DataTypes.STRING,
       is_delete: DataTypes.INTEGER,
       deletedAt: {
         type: DataTypes.DATE,

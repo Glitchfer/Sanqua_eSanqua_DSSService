@@ -26,6 +26,7 @@ const LocalUtility = require("../utils/globalutility.js");
 const _globalUtilInstance = new LocalUtility();
 
 const OAuthService = require("./oauthservice.js");
+const { log } = require("console");
 const _oAuthServiceInstance = new OAuthService();
 
 const _xClassName = "FormTemplateService";
@@ -92,6 +93,7 @@ class FormTemplateService {
             department_id: xDetail.data.department_id,
             department_name: xDetail.data.department_name,
             audit_type: xDetail.data.audit_type,
+            audit_type_id: xDetail.data.audit_type_id,
             form_template_item: xTemplateItem,
 
             created_by_name: xDetail.data.created_by_name,
@@ -543,7 +545,7 @@ class FormTemplateService {
         );
         if (xDecId.status_code == "00") {
           var xDecTemplateId = await _utilInstance.decrypt(
-            pParam.form_template_id,
+            pParam.formtemplate_id,
             config.cryptoKey.hashKey
           );
           console.log(`xDecTemplateId>>>> ${JSON.stringify(xDecTemplateId)}`);
@@ -552,9 +554,9 @@ class FormTemplateService {
             let xCheckTemplateId = await _repoInstance.getById({
               id: xDecTemplateId.decrypted,
             });
-            console.log(
-              `xCheckTemplateId>>>> ${JSON.stringify(xCheckTemplateId)}`
-            );
+            // console.log(
+            //   `xCheckTemplateId>>>> ${JSON.stringify(xCheckTemplateId)}`
+            // );
             if (xCheckTemplateId.status_code == "00") {
               pParam.created_by = xDecId.decrypted;
               pParam.created_by_name = pParam.user_name;
@@ -659,6 +661,71 @@ class FormTemplateService {
       xJoResult = {
         status_code: "-99",
         status_msg: `Exception error <${_xClassName}.deleteItem>: ${e.message}`,
+      };
+    }
+
+    return xJoResult;
+  }
+
+  async generateItem(pParam) {
+    console.log("hereee>>>");
+
+    var xJoResult;
+    var xAct = pParam.act;
+    var xFlagProcess = true;
+    try {
+      delete pParam.act;
+      if (xAct == "generate") {
+        var xDecId = await _utilInstance.decrypt(
+          pParam.id,
+          config.cryptoKey.hashKey
+        );
+        if (xDecId.status_code == "00") {
+          pParam.id = xDecId.decrypted;
+          xDecId = await _utilInstance.decrypt(
+            pParam.user_id,
+            config.cryptoKey.hashKey
+          );
+          if (xDecId.status_code == "00") {
+            pParam.created_by = xDecId.decrypted;
+            pParam.created_by_name = pParam.user_name;
+          } else {
+            xFlagProcess = false;
+            xJoResult = xDecId;
+          }
+        } else {
+          xFlagProcess = false;
+          xJoResult = xDecId;
+        }
+
+        if (xFlagProcess) {
+          let xCheckTemplate = await _repoInstance.getById({
+            id: pParam.id,
+          });
+          console.log(
+            `xCheckTemplate>>>> ${JSON.stringify(xCheckTemplate.data)}`
+          );
+          if (xCheckTemplate.status_code == "00") {
+            var xAddResult = await _repoInstance.generateItem(pParam, xAct);
+            xJoResult = xAddResult;
+          } else {
+            xJoResult = {
+              status_code: "-99",
+              status_msg: `Invalid formulir ID or data not found`,
+            };
+          }
+        }
+      }
+    } catch (e) {
+      _utilInstance.writeLog(
+        `${_xClassName}.generateItem`,
+        `Exception error: ${e.message}`,
+        "error"
+      );
+
+      xJoResult = {
+        status_code: "-99",
+        status_msg: `Exception error <${_xClassName}.generateItem>: ${e.message}`,
       };
     }
 

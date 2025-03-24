@@ -108,9 +108,6 @@ module.exports = (app) => {
   arrValidate = [];
   arrValidate = [
     check("act").not().isEmpty().withMessage("Parameter name can not be empty"),
-    check("form_template_id", "Parameter template_id can not be empty")
-      .not()
-      .isEmpty(),
     check(
       "clause_id",
       "Parameter clause_id can not be empty and must be integer"
@@ -118,6 +115,36 @@ module.exports = (app) => {
       .not()
       .isEmpty()
       .isInt(),
+
+    // check("id")
+    //   .optional()
+    //   .notEmpty()
+    //   .withMessage("Parameter id can not be empty"),
+    // check("formtemplate_id")
+    //   .optional()
+    //   .notEmpty()
+    //   .withMessage("Parameter formtemplate_id can not be empty"),
+    check("act").custom((value, { req }) => {
+      console.log("check id>>>", value);
+
+      if (value == "add" && !req.body.formtemplate_id) {
+        throw new Error("formtemplate_id is required.");
+      }
+
+      if (value == "update" && !req.body.id) {
+        throw new Error("ID is required.");
+      }
+      return true;
+    }),
+    // check("formtemplate_id").custom((value, { req }) => {
+    //   console.log("check formtemplate_id>>>", value);
+    //   if (!value && !req.body.id) {
+    //     throw new Error(
+    //       "At least one field (id or formtemplate_id) is required."
+    //     );
+    //   }
+    //   return true;
+    // }),
   ];
   app.post(
     _rootAPIPath + "/item/save",
@@ -133,5 +160,16 @@ module.exports = (app) => {
     _rootAPIPath + "/item/delete/:id",
     arrValidate,
     _formTemplateController.deleteItem
+  );
+
+  arrValidate = [];
+  arrValidate = [
+    check("act").not().isEmpty().withMessage("Parameter name can not be empty"),
+    check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+  ];
+  app.post(
+    _rootAPIPath + "/item/generate",
+    arrValidate,
+    _formTemplateController.generateItem
   );
 };

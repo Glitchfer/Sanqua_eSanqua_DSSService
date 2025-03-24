@@ -649,6 +649,51 @@ class FormTemplate {
     }
     return xJoResult;
   }
+
+  async generateItem(pParam) {
+    console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
+    var xJoResult = {};
+    try {
+      var xSql = "";
+      xSql = `SELECT * FROM func_generate_template_item('{
+                "id":"${pParam.id}",
+                "created_by": ${pParam.created_by},
+                "created_by_name": "${pParam.created_by_name}"
+            }'::json);`;
+      // console.log("SQL_FUNCTION>>>>>", xSql);
+
+      var xDtQuery = await sequelize.query(xSql, {
+        type: sequelize.QueryTypes.SELECT,
+      });
+
+      console.log(`>>> xDtQuery: ${JSON.stringify(xDtQuery)}`);
+      if (xDtQuery.length > 0) {
+        console.log(`>>> xDtQuery: ${JSON.stringify(xDtQuery)}`);
+        if (xDtQuery[0].func_generate_template_item.status_code == "00") {
+          xJoResult = {
+            status_code: xDtQuery[0].func_generate_template_item.status_code,
+            status_msg: xDtQuery[0].func_generate_template_item.status_msg,
+            data: xDtQuery[0].func_generate_template_item.data,
+          };
+        } else {
+          xJoResult = xDtQuery[0].func_generate_template_item;
+        }
+      }
+    } catch (e) {
+      // console.log('xDtQuery>>>>>', e);
+      _utilInstance.writeLog(
+        `${_xClassName}.generateFormAudit`,
+        `Exception error: ${e.message}`,
+        "error"
+      );
+      xJoResult = {
+        status_code: "-99",
+        status_msg: `Exception error <${_xClassName}.generateFormAudit>: ${e.message}`,
+      };
+    }
+
+    return xJoResult;
+  }
 }
 
 module.exports = FormTemplate;

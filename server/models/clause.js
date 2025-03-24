@@ -48,14 +48,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "audit_type_id",
       as: "audit_type",
     });
-    // Clause.belongsTo(models.ms_areas, {
-    //   foreignKey: "area_id",
-    //   as: "area",
-    // });
-    // Clause.belongsTo(models.ms_scopes, {
-    //   foreignKey: "scope_id",
-    //   as: "scope",
-    // });
   };
 
   return Clause;
