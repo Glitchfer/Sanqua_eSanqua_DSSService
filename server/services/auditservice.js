@@ -366,44 +366,52 @@ class AuditService {
 
             // document detail item
             const xDetailItemData = xDetail.data.audit_item;
+            // console.log(
+            //   `>>> xDetailItemData : ${JSON.stringify(xDetailItemData)}`
+            // );
             if (xDetailItemData != null) {
               for (let i = 0; i < xDetailItemData.length; i++) {
                 xAuditItemDetail.push({
                   id: await _utilInstance.encrypt(
-                  xDetailItemData[i].id.toString(),
+                    xDetailItemData[i].id.toString(),
                     config.cryptoKey.hashKey
                   ),
                   // audit:xDetailItemData[i].audit,
-                  company_id:xDetailItemData[i].clause_company_id,
-                  clause_id:xDetailItemData[i].clause_id,
-                  clause_desc:xDetailItemData[i].clause_desc,
-                  clause_no:xDetailItemData[i].clause_no,
-                  audit_type:xDetailItemData[i].audit_type,
-                  area:xDetailItemData[i].area,
-                  scope:xDetailItemData[i].scope,
-                  company_id:xDetailItemData[i].clause_company_id,
-                  category_id:xDetailItemData[i].clause_category_id,
-                  category_name:xDetailItemData[i].clause_category_name,
-                  score_id:xDetailItemData[i].score_id,
-                  score_name:xDetailItemData[i].score_name,
-                  score_value:xDetailItemData[i].score_value,
-                  objective_evidence:xDetailItemData[i].objective_evidence,
-                  corrective_plan_due_date:xDetailItemData[i].corrective_plan_due_date,
-                  corrective_plan_desc:xDetailItemData[i].corrective_plan_desc,
-                  corrective_due_date:xDetailItemData[i].corrective_due_date,
-                  corrective_evidence:xDetailItemData[i].corrective_evidence,
-                  verification_note:xDetailItemData[i].verification_note,
-                  status:xDetailItemData[i].status,
-                  created_by_name:xDetailItemData[i].created_by_name,
+                  company_id: xDetailItemData[i].clause_company_id,
+                  clause_id: xDetailItemData[i].clause_id,
+                  clause_desc: xDetailItemData[i].clause_desc,
+                  clause_no: xDetailItemData[i].clause_no,
+                  audit_type: xDetailItemData[i].audit_type,
+                  area: xDetailItemData[i].area,
+                  scope: xDetailItemData[i].scope,
+                  company_id: xDetailItemData[i].clause_company_id,
+                  category_id: xDetailItemData[i].clause_category_id,
+                  category_name: xDetailItemData[i].clause_category_name,
+                  score_id: xDetailItemData[i].score_id,
+                  score_name: xDetailItemData[i].score_name,
+                  score_value: xDetailItemData[i].score_value,
+                  objective_evidence: xDetailItemData[i].objective_evidence,
+                  corrective_plan_due_date:
+                    xDetailItemData[i].corrective_plan_due_date,
+                  corrective_plan_desc: xDetailItemData[i].corrective_plan_desc,
+                  corrective_due_date: xDetailItemData[i].corrective_due_date,
+                  corrective_evidence: xDetailItemData[i].corrective_evidence,
+                  verification_note: xDetailItemData[i].verification_note,
+                  status: xDetailItemData[i].status,
+                  created_by_name: xDetailItemData[i].created_by_name,
                   created_at:
-                  xDetailItemData[i].createdAt != null
-                      ? moment(xDetail.data.createdAt).format("DD-MM-YYYY HH:mm:ss")
+                    xDetailItemData[i].createdAt != null
+                      ? moment(xDetail.data.createdAt).format(
+                          "DD-MM-YYYY HH:mm:ss"
+                        )
                       : null,
-                  updated_by_name:xDetailItemData[i].updated_by_name,
+                  updated_by_name: xDetailItemData[i].updated_by_name,
                   updated_at:
-                  xDetailItemData[i].updatedAt != null
-                      ? moment(xDetail.data.updatedAt).format("DD-MM-YYYY HH:mm:ss")
-                      : null
+                    xDetailItemData[i].updatedAt != null
+                      ? moment(xDetail.data.updatedAt).format(
+                          "DD-MM-YYYY HH:mm:ss"
+                        )
+                      : null,
                 });
               }
             }
@@ -413,26 +421,30 @@ class AuditService {
               for (let i = 0; i < xDetailMember.length; i++) {
                 xAuditMember.push({
                   id: await _utilInstance.encrypt(
-                  xDetailMember[i].id.toString(),
+                    xDetailMember[i].id.toString(),
                     config.cryptoKey.hashKey
                   ),
                   // audit:xDetailMember[i].audit,
-                  employee_id:xDetailMember[i].employee_id,
-                  employee_name:xDetailMember[i].employee_name,
-                  employee_code:xDetailMember[i].employee_code,
-                  scope_ids:xDetailMember[i].scope_ids,
-                  area_ids:xDetailMember[i].area_ids,
-                  member_type:xDetailMember[i].member_type,
-                  created_by_name:xDetailMember[i].created_by_name,
+                  employee_id: xDetailMember[i].employee_id,
+                  employee_name: xDetailMember[i].employee_name,
+                  employee_code: xDetailMember[i].employee_code,
+                  scope_ids: xDetailMember[i].scope_ids,
+                  area_ids: xDetailMember[i].area_ids,
+                  member_type: xDetailMember[i].member_type,
+                  created_by_name: xDetailMember[i].created_by_name,
                   created_at:
-                  xDetailMember[i].createdAt != null
-                      ? moment(xDetail.data.createdAt).format("DD-MM-YYYY HH:mm:ss")
+                    xDetailMember[i].createdAt != null
+                      ? moment(xDetail.data.createdAt).format(
+                          "DD-MM-YYYY HH:mm:ss"
+                        )
                       : null,
-                  updated_by_name:xDetailMember[i].updated_by_name,
+                  updated_by_name: xDetailMember[i].updated_by_name,
                   updated_at:
-                  xDetailMember[i].updatedAt != null
-                      ? moment(xDetail.data.updatedAt).format("DD-MM-YYYY HH:mm:ss")
-                      : null
+                    xDetailMember[i].updatedAt != null
+                      ? moment(xDetail.data.updatedAt).format(
+                          "DD-MM-YYYY HH:mm:ss"
+                        )
+                      : null,
                 });
               }
             }

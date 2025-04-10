@@ -15,6 +15,8 @@ const _modelDb = require("../models").tr_audits;
 const _modelAuditItemScore = require("../models").tr_audititemscores;
 const _modelAuditMember = require("../models").tr_auditmembers;
 const _modelAuditType = require("../models").ms_audittypes;
+const _modelArea = require("../models").ms_areas;
+const _modelScope = require("../models").ms_scopes;
 // const _modelEmployee = require('../models').ms_employees;
 // const _modelPayrollTemplate = require('../models').ms_payrolltemplates;
 // const _modelEmployeeLevel = require('../models').ms_employeelevels;
@@ -32,6 +34,7 @@ class AuditRepository {
     var xWhereOr = [];
     var xWhereAnd = [];
     var xWhere = [];
+    var xOrder = [];
     var xAttributes = [];
     var xJoResult = {};
 
@@ -39,12 +42,23 @@ class AuditRepository {
       xInclude = [
         {
           model: _modelAuditItemScore,
-          as: "audit_item"
-          // attributes: ["id", "name"],
+          as: "audit_item",
+          include: [
+            {
+              model: _modelArea,
+              as: "area",
+              attributes: ["id", "name"],
+            },
+            {
+              model: _modelScope,
+              as: "scope",
+              attributes: ["id", "name"],
+            },
+          ],
         },
         {
           model: _modelAuditMember,
-          as: "audit_member"
+          as: "audit_member",
           // attributes: ["id", "name"],
         },
         {
@@ -52,6 +66,9 @@ class AuditRepository {
           as: "audit_type",
           attributes: ["id", "name"],
         },
+      ];
+      xOrder = [
+        [{ model: _modelAuditItemScore, as: "audit_item" }, "id", "ASC"],
       ];
 
       xWhereAnd.push({
@@ -67,6 +84,7 @@ class AuditRepository {
       var xData = await _modelDb.findOne({
         where: xWhere,
         include: xInclude,
+        order: xOrder,
         // subQuery: false
       });
 
@@ -129,6 +147,30 @@ class AuditRepository {
         if (pParam.audit_type_id != "") {
           xWhereAnd.push({
             audit_type_id: pParam.audit_type_id,
+          });
+        }
+      }
+
+      if (
+        pParam.hasOwnProperty("start_date") &&
+        pParam.hasOwnProperty("end_date")
+      ) {
+        if (pParam.start_date != "" && pParam.end_date != "") {
+          xWhereAnd.push({
+            audit_date: {
+              [Op.between]: [
+                pParam.start_date + " 00:00:00",
+                pParam.end_date + " 23:59:59",
+              ],
+            },
+          });
+        }
+      }
+
+      if (pParam.hasOwnProperty("status")) {
+        if (pParam.status != "") {
+          xWhereAnd.push({
+            status: pParam.status,
           });
         }
       }
