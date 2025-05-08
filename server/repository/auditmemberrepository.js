@@ -32,6 +32,22 @@ class AuditRepository {
       xTransaction = await sequelize.transaction();
       xJoinedTable = {};
 
+      var objProperty = Object.getOwnPropertyNames(pParam);
+      for (let i = 0; i < objProperty.length; i++) {
+        if (objProperty[i].includes("_ids")) {
+          if (
+            pParam[objProperty[i]] != null &&
+            pParam[objProperty[i]].length > 0
+          ) {
+            pParam[objProperty[i]] = Sequelize.literal(
+              `ARRAY[${pParam[objProperty[i]].join(",")}]`
+            );
+          } else {
+            pParam[objProperty[i]] = null;
+          }
+        }
+      }
+
       if (pAct == "add") {
         xSaved = await _modelDb.create(pParam, xJoinedTable, {
           transaction: xTransaction,

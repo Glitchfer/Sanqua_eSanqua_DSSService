@@ -26,8 +26,11 @@ module.exports = (sequelize, DataTypes) => {
     corrective_due_date: DataTypes.DATE,
     corrective_evidence: DataTypes.JSON,
     verification_note: DataTypes.STRING,
+    cancel_note: DataTypes.STRING,
     status: DataTypes.INTEGER, //0:not active, 1: active
-    is_block: DataTypes.BOOLEAN,
+    // is_block: DataTypes.BOOLEAN,
+    // is_score_double: DataTypes.BOOLEAN,
+    score_multiplier: DataTypes.BOOLEAN,
 
     createdAt: {
       type: DataTypes.DATE,
@@ -42,6 +45,25 @@ module.exports = (sequelize, DataTypes) => {
     },
     updated_by: DataTypes.INTEGER,
     updated_by_name: DataTypes.STRING,
+
+    submitAt: {
+      type: DataTypes.DATE,
+      field: "submit_at",
+    },
+    submit_by: DataTypes.INTEGER,
+    submit_by_name: DataTypes.STRING,
+    verifyAt: {
+      type: DataTypes.DATE,
+      field: "verify_at",
+    },
+    verify_by: DataTypes.INTEGER,
+    verify_by_name: DataTypes.STRING,
+    cancelAt: {
+      type: DataTypes.DATE,
+      field: "cancel_at",
+    },
+    cancel_by: DataTypes.INTEGER,
+    cancel_by_name: DataTypes.STRING,
   });
 
   AuditItemScore.associate = function (models) {

@@ -21,6 +21,8 @@ const _globalUtilInstance = new GlobalUtility();
 // Repository
 const Repository = require("../repository/auditmemberrepository.js");
 const _repoInstance = new Repository();
+const AuditRepo = require("../repository/auditrepository.js");
+const _auditRepo = new AuditRepo();
 
 // Service
 
@@ -43,8 +45,15 @@ class AuditMemberService {
       xFlagProcess = false;
 
       if (xAct == "add") {
-        if (pParam.hasOwnProperty("logged_user_id") && pParam.hasOwnProperty("audit_id")) {
-          if (pParam.logged_user_id != "" && pParam.audit_id != "") {
+        if (
+          pParam.hasOwnProperty("logged_user_id") &&
+          pParam.hasOwnProperty("audit_id")
+        ) {
+          if (
+            pParam.logged_user_id != "" &&
+            pParam.audit_id != "" &&
+            pParam.audit_id != null
+          ) {
             xDecId = await _utilInstance.decrypt(
               pParam.audit_id,
               config.cryptoKey.hashKey
@@ -86,28 +95,42 @@ class AuditMemberService {
       } else if (xAct == "update") {
         if (
           pParam.hasOwnProperty("logged_user_id") &&
+          pParam.hasOwnProperty("audit_id") &&
           pParam.hasOwnProperty("id")
         ) {
-          if (pParam.logged_user_id != "" && pParam.id != "") {
-            xDecId = await _utilInstance.decrypt(
-              pParam.id,
+          if (
+            pParam.logged_user_id != "" &&
+            pParam.id != "" &&
+            pParam.audit_id != ""
+          ) {
+            var xAuditId = await _utilInstance.decrypt(
+              pParam.audit_id,
               config.cryptoKey.hashKey
             );
-            if (xDecId.status_code == "00") {
-              pParam.id = xDecId.decrypted;
-              var xLogId = await _utilInstance.decrypt(
-                pParam.logged_user_id,
+            if (xAuditId.status_code == "00") {
+              pParam.audit_id = xAuditId.decrypted;
+              xDecId = await _utilInstance.decrypt(
+                pParam.id,
                 config.cryptoKey.hashKey
               );
-              if (xLogId.status_code == "00") {
-                pParam.updated_by = xLogId.decrypted;
-                pParam.updated_by_name = pParam.logged_user_name;
-                xFlagProcess = true;
+              if (xDecId.status_code == "00") {
+                pParam.id = xDecId.decrypted;
+                var xLogId = await _utilInstance.decrypt(
+                  pParam.logged_user_id,
+                  config.cryptoKey.hashKey
+                );
+                if (xLogId.status_code == "00") {
+                  pParam.updated_by = xLogId.decrypted;
+                  pParam.updated_by_name = pParam.logged_user_name;
+                  xFlagProcess = true;
+                } else {
+                  xJoResult = xLogId;
+                }
               } else {
-                xJoResult = xLogId;
+                xJoResult = xDecId;
               }
             } else {
-              xJoResult = xDecId;
+              xJoResult = xAuditId;
             }
           } else {
             xJoResult = {
@@ -124,8 +147,9 @@ class AuditMemberService {
 
         if (xFlagProcess) {
           // check is document already processd or not
-          var xGetDataById = await _repoInstance.getById(pParam);
-          // console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
+          var xGetDataById = await _auditRepo.getById({ id: pParam.audit_id });
+          console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
+          console.log(`pParam>>>>>>: ${JSON.stringify(pParam)}`);
           if (xGetDataById.status_code == "00") {
             if (xGetDataById.data.status == 0) {
               var xAddResult = await _repoInstance.save(pParam, xAct);
@@ -211,7 +235,7 @@ class AuditMemberService {
         }
 
         if (xFlagProcess) {
-          let xDetail = await _repoInstance.getByParam(pParam);
+          let xDetail = await _auditRepo.getByParam(pParam);
           if (xDetail.status_code == "00") {
             if (xDetail.data.status == 0) {
               var xDeleteResult = await _repoInstance.delete(pParam);
@@ -231,7 +255,6 @@ class AuditMemberService {
             status_msg: `xFlagProcess <${_xClassName}.delete>: Delete Failed`,
           };
         }
-
       } else {
         xJoResult = {
           status_code: "-99",

@@ -419,7 +419,10 @@ class AuditItemScoreService {
             } else {
               let xParamUpdate = {
                 id: pParam.id,
-                status: xStatusDocument
+                status: xStatusDocument,
+                submit_by:  xLogId.decrypted,
+                submit_by_name: pParam.logged_user_name,
+                submitAt: await _utilInstance.getCurrDateTime()
               };
               xJoResult = await _repoInstance.save(xParamUpdate, "update");
             }
@@ -514,6 +517,10 @@ class AuditItemScoreService {
               let xParamUpdate = {
                 id: pParam.id,
                 status: xStatusDocument,
+                cancel_note:  pParam.cancel_note,
+                cancel_by:  xLogId.decrypted,
+                cancel_by_name: pParam.logged_user_name,
+                cancelAt: await _utilInstance.getCurrDateTime()
               };
               xJoResult = await _repoInstance.save(xParamUpdate, "update");
             } else {
@@ -713,7 +720,10 @@ class AuditItemScoreService {
               let xParamUpdate = {
                 id: pParam.id,
                 status: xStatusDocument,
-                verification_note: pParam.note
+                verification_note: pParam.verification_note,
+                verify_by:  xLogId.decrypted,
+                verify_by_name: pParam.logged_user_name,
+                verifyAt: await _utilInstance.getCurrDateTime()
               };
               xJoResult = await _repoInstance.save(xParamUpdate, "update");
             } else {

@@ -349,7 +349,7 @@ class PerformanceReportService {
 
       if (xFlagProcess) {
         let xDetail = await _repoInstance.getById(pParam);
-        // console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
+        console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
 
         if (xDetail) {
           if (xDetail.status_code == "00") {

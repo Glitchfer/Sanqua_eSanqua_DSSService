@@ -226,7 +226,8 @@ class MasterRepository {
             pParam.model == "bodypart" ||
             pParam.model == "injuredcategory" ||
             pParam.model == "objectcategory" ||
-            pParam.model == "clausecategory"
+            pParam.model == "clausecategory" ||
+            pParam.model == "grade"
           ) {
             xWhereOr.push(
               {

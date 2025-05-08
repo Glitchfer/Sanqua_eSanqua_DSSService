@@ -67,7 +67,7 @@ class MasterService {
     var _repoInstance = new MasterRepository(pParam.model, pParam.app);
 
     var xResultList = await _repoInstance.list(pParam);
-    // console.log(`MASTER LIST>>>>>>>>>, ${JSON.stringify(xResultList)}`);
+    console.log(`MASTER LIST>>>>>>>>>, ${JSON.stringify(xResultList)}`);
 
     if (xResultList.status_code == "00") {
       if (xResultList.data.count > 0) {
@@ -97,6 +97,7 @@ class MasterService {
       xJoResult = xResultList;
     }
 
+    console.log(`xJoResult>>>, ${JSON.stringify(xJoResult)}`);
     return xJoResult;
   }
 

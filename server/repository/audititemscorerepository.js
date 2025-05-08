@@ -37,6 +37,7 @@ class AuditRepository {
       xJoinedTable = {};
 
       if (pAct == "update") {
+        // console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
         var xId = pParam.id;
         delete pParam.id;
         var xWhere = {
@@ -71,7 +72,7 @@ class AuditRepository {
     return xJoResult;
   }
 
-  async list(pParam) {
+  async list(pParam, pAct) {
     // var xOrder = [ sequelize.col('employee.name', 'asc') ];
     // var xOrder = [ [ sequelize.col('created_at', 'desc') ] ];
     var xOrder = ["createdAt"];
@@ -228,12 +229,16 @@ class AuditRepository {
 
       var xData = await _modelDb.findAndCountAll(xParamQuery);
 
-      xJoResult = {
-        status_code: "00",
-        status_msg: "OK",
-        data: xData,
-        total_record: xCountDataWithoutLimit,
-      };
+      if (pAct == "check") {
+        xJoResult = xData;
+      } else {
+        xJoResult = {
+          status_code: "00",
+          status_msg: "OK",
+          data: xData,
+          total_record: xCountDataWithoutLimit,
+        };
+      }
     } catch (e) {
       _utilInstance.writeLog(
         `${_xClassName}.list`,
@@ -241,10 +246,14 @@ class AuditRepository {
         "error"
       );
 
-      xJoResult = {
-        status_code: "-99",
-        status_msg: `Failed get data. Error : ${e.message}`,
-      };
+      if (pAct == "check") {
+        xJoResult = null;
+      } else {
+        xJoResult = {
+          status_code: "-99",
+          status_msg: `Failed get data. Error : ${e.message}`,
+        };
+      }
     }
 
     return xJoResult;
@@ -284,7 +293,7 @@ class AuditRepository {
           });
         }
       }
-      
+
       if (pParam.hasOwnProperty("audit_id")) {
         if (pParam.audit_id != "") {
           xWhereAnd.push({

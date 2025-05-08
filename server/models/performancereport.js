@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true,
     },
+    name: DataTypes.STRING,
     document_no: DataTypes.STRING,
     company_id: DataTypes.INTEGER,
     company_name: DataTypes.STRING,
@@ -40,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     updated_by: DataTypes.INTEGER,
     updated_by_name: DataTypes.STRING,
-    
+
     submited_by: DataTypes.INTEGER,
     submited_by_name: DataTypes.STRING,
     submitedAt: {
@@ -60,15 +61,15 @@ module.exports = (sequelize, DataTypes) => {
     set_draftAt: {
       type: DataTypes.DATE,
       field: "set_draft_at",
-    }
+    },
   });
 
   // PerformanceReport.associate = function (models) {
 
-    // PerformanceReport.belongsTo(models.ms_dangerconditions, {
-    //   foreignKey: "danger_condition_id",
-    //   as: "danger_condition",
-    // });
+  // PerformanceReport.belongsTo(models.ms_dangerconditions, {
+  //   foreignKey: "danger_condition_id",
+  //   as: "danger_condition",
+  // });
   // };
 
   return PerformanceReport;
