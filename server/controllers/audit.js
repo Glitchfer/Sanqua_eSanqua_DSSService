@@ -102,6 +102,8 @@ async function save(req, res) {
           xOAuthResult.token_data.result_verify == null
             ? null
             : xOAuthResult.token_data.result_verify.name;
+        req.body.logged_user_level =
+          xOAuthResult.token_data.result_verify.user_level;
         req.body.method = req.headers["x-method"];
         req.body.token = req.headers["x-token"];
         xJoResult = await _serviceInstance.save(req.body);

@@ -172,7 +172,7 @@ class AuditService {
           if (xFlagProcess) {
             // check is document already processd or not
             var xGetDataById = await _repoInstance.getById(pParam);
-            console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
+            // console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
             if (xGetDataById.status_code == "00") {
               if (xGetDataById.data.status == 0) {
                 var xAddResult = await _repoInstance.save(pParam, xAct);
