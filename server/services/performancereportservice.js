@@ -47,16 +47,14 @@ class PerformanceReportService {
       );
 
       if (xLevel) {
-        if (
-          pParam.hasOwnProperty("logged_user_id")
-        ) {
+        if (pParam.hasOwnProperty("logged_user_id")) {
           if (pParam.logged_user_id != "") {
             xLogId = await _utilInstance.decrypt(
               pParam.logged_user_id,
               config.cryptoKey.hashKey
             );
             if (xLogId.status_code == "00") {
-              pParam.logged_user_id = xLogId.decrypted
+              pParam.logged_user_id = xLogId.decrypted;
               xFlagProcess = true;
             } else {
               xJoResult = xLogId;
@@ -123,9 +121,7 @@ class PerformanceReportService {
             }
           }
         } else if (xAct == "update") {
-          if (
-            pParam.hasOwnProperty("id")
-          ) {
+          if (pParam.hasOwnProperty("id")) {
             if (pParam.id != "") {
               xDecId = await _utilInstance.decrypt(
                 pParam.id,
@@ -154,10 +150,11 @@ class PerformanceReportService {
 
           if (xFlagProcess) {
             // check is document already processd or not
-            var xGetDataById = await _repoInstance.getById({id: pParam.id});
+            var xGetDataById = await _repoInstance.getById({ id: pParam.id });
             console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
             if (xGetDataById.status_code == "00") {
               if (xGetDataById.data.status == 0) {
+                console.log(`pParam>>>>>>: ${JSON.stringify(pParam)}`);
                 var xAddResult = await _repoInstance.save(pParam, xAct);
                 xJoResult = xAddResult;
               } else {
@@ -238,11 +235,18 @@ class PerformanceReportService {
           if (xResultList.status_code == "00") {
             var xRows = xResultList.data.rows;
             for (var index in xRows) {
+              let manhour =
+                xRows[index].total_employee * 7 * xRows[index].workdays;
+
+              if (manhour != NaN) {
+                manhour = Math.round(manhour * 1000) / 1000;
+              }
               xJoArrData.push({
                 id: await _utilInstance.encrypt(
                   xRows[index].id.toString(),
                   config.cryptoKey.hashKey
                 ),
+                name: xRows[index].name,
                 document_no: xRows[index].document_no,
                 company_id: xRows[index].company_id,
                 company_name: xRows[index].company_name,
@@ -252,6 +256,7 @@ class PerformanceReportService {
                 total_employee: xRows[index].total_employee,
                 total_other_people: xRows[index].total_other_people,
                 workdays: xRows[index].workdays,
+                manhour: manhour,
                 cancel_note: xRows[index].cancel_note,
                 status:
                   xRows[index].status != null
@@ -353,10 +358,16 @@ class PerformanceReportService {
 
         if (xDetail) {
           if (xDetail.status_code == "00") {
+            let manhour =
+              xDetail.data.total_employee * 7 * xDetail.data.workdays;
+            if (manhour != NaN) {
+              manhour = Math.round(manhour * 1000) / 1000;
+            }
             // Get Approval matrix
             var xParamApprovalMatrix = {
               application_id: config.applicationId,
-              table_name: config.approvalMatrixConfig.tableName.auditDocument,
+              table_name:
+                config.approvalMatrixConfig.tableName.performanceReport,
               document_id: xEncId,
             };
             var xResultApprovalMatrix =
@@ -377,9 +388,12 @@ class PerformanceReportService {
               company_name: xDetail.data.company_name,
               pic_id: xDetail.data.pic_id,
               pic_name: xDetail.data.pic_name,
+              pic_nik: xDetail.data.pic_nik,
               workdays: xDetail.data.workdays,
+              name: xDetail.data.name,
               total_employee: xDetail.data.total_employee,
               total_other_people: xDetail.data.total_other_people,
+              manhour: manhour,
               status:
                 xDetail.data.status != null
                   ? {
@@ -472,6 +486,7 @@ class PerformanceReportService {
           pParam.hasOwnProperty("id")
         ) {
           if (pParam.logged_user_id != "" && pParam.id != "") {
+            xEncId = pParam.id;
             xDecId = await _utilInstance.decrypt(
               pParam.id,
               config.cryptoKey.hashKey
@@ -483,7 +498,7 @@ class PerformanceReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -551,12 +566,14 @@ class PerformanceReportService {
                   // department_id: xDocDetail.data.department_id,
                 };
 
+                console.log(`heree >>> 6 : ${JSON.stringify(xParamAddApprovalMatrix)}`);
                 var xApprovalMatrixResult =
                   await _oAuthServiceInstance.addApprovalMatrix(
                     pParam.method,
                     pParam.token,
                     xParamAddApprovalMatrix
                   );
+                console.log(`heree >>> 7 : ${JSON.stringify(xApprovalMatrixResult)}`);
                 if (xApprovalMatrixResult.status_code == "00") {
                   let xArrApprover = [];
                   for (
@@ -588,7 +605,7 @@ class PerformanceReportService {
                     xParamUpdateApproverId,
                     "update"
                   );
-                  
+
                   xJoResult = xResultUpdate;
                   xJoResult.approval_matrix_result = xApprovalMatrixResult;
                 } else {
@@ -655,7 +672,7 @@ class PerformanceReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -765,7 +782,7 @@ class PerformanceReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -836,7 +853,7 @@ class PerformanceReportService {
 
     return xJoResult;
   }
-  
+
   async approve(pParam) {
     var xJoResult;
     var xDecId = null;
@@ -886,7 +903,8 @@ class PerformanceReportService {
               document_id: xEncId,
               status: 1,
               application_id: config.applicationId,
-              table_name: config.approvalMatrixConfig.tableName.performanceReport,
+              table_name:
+                config.approvalMatrixConfig.tableName.performanceReport,
               note: pParam.note,
             };
 
@@ -976,7 +994,7 @@ class PerformanceReportService {
     var xDecId = null;
     var xFlagProcess = false;
     var xEncId = "";
-    var xStatusRequest = 5;
+    var xStatusRequest = 4;
 
     try {
       if (pParam.hasOwnProperty("document_id")) {
@@ -1021,7 +1039,8 @@ class PerformanceReportService {
               document_id: xEncId,
               status: -1,
               application_id: config.applicationId,
-              table_name: config.approvalMatrixConfig.tableName.performanceReport,
+              table_name:
+                config.approvalMatrixConfig.tableName.performanceReport,
               note: pParam.note,
             };
 
@@ -1107,7 +1126,7 @@ class PerformanceReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -1149,7 +1168,6 @@ class PerformanceReportService {
             status_msg: `xFlagProcess <${_xClassName}.delete>: Delete Failed`,
           };
         }
-
       } else {
         xJoResult = {
           status_code: "-99",

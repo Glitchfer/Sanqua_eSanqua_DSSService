@@ -11,29 +11,29 @@ const { hash } = require("bcryptjs");
 const Op = Sequelize.Op;
 
 // Model
-const _modelDb = require("../models").tr_personinvolves;
-const _modelIntialReport = require("../models").tr_initialreports;
+const _modelDb = require("../models").tr_discoveryitems;
+// const _modelAudit = require("../models").tr_audits;
+// const _modelAuditType = require("../models").ms_audittypes;
+const _modelArea = require("../models").ms_areas;
+const _modelScope = require("../models").ms_scopes;
 
 const Utility = require("peters-globallib-v2");
 const _utilInstance = new Utility();
 
-const _xClassName = "PersonInvolveRepo";
+const _xClassName = "DiscoveryItemRepository";
 
-class PersonInvolveRepo {
+class DiscoveryItemRepository {
   constructor() {}
   async save(pParam, pAct) {
     var xJoResult = {};
     let xTransaction;
     var xSaved = null;
-    var xJoinedTable = [];
 
     try {
       var xSaved = null;
       xTransaction = await sequelize.transaction();
-      xJoinedTable = {};
-
       if (pAct == "add") {
-        xSaved = await _modelDb.create(pParam, xJoinedTable, {
+        xSaved = await _modelDb.create(pParam, {
           transaction: xTransaction,
         });
         if (xSaved.id != null) {
@@ -47,8 +47,14 @@ class PersonInvolveRepo {
             ),
             clear_id: xSaved.id,
           };
+        } else {
+          xJoResult = {
+            status_code: "-99",
+            status_msg: "Save data failed",
+          };
         }
       } else if (pAct == "update") {
+        // console.log(`>>> pParam: ${JSON.stringify(pParam)}`);
         var xId = pParam.id;
         delete pParam.id;
         var xWhere = {
@@ -64,6 +70,11 @@ class PersonInvolveRepo {
         xJoResult = {
           status_code: "00",
           status_msg: "Data has been successfully updated",
+        };
+      } else {
+        xJoResult = {
+          status_code: "-99",
+          status_msg: "Invalid action",
         };
       }
     } catch (e) {
@@ -83,10 +94,10 @@ class PersonInvolveRepo {
     return xJoResult;
   }
 
-  async list(pParam) {
+  async list(pParam, pAct) {
     // var xOrder = [ sequelize.col('employee.name', 'asc') ];
     // var xOrder = [ [ sequelize.col('created_at', 'desc') ] ];
-    var xOrder = ["createdAt"];
+    var xOrder = ["id"];
     var xWhere = [];
     var xWhereOr = [];
     var xWhereAnd = [];
@@ -95,30 +106,64 @@ class PersonInvolveRepo {
 
     try {
       xInclude = [
+        // {
+        //   model: _modelAudit,
+        //   as: "audit",
+        //   attributes: ["name", "audit_no", "status"],
+        // },
+        // {
+        //   model: _modelAuditType,
+        //   as: "audit_type",
+        //   attributes: ["id", "name"],
+        // },
         {
-          model: _modelIntialReport,
-          as: "initial_report",
-          attributes: ["name", "document_no", "status"],
+          model: _modelArea,
+          as: "area",
+          attributes: ["id", "name"],
+        },
+        {
+          model: _modelScope,
+          as: "scope",
+          attributes: ["id", "name"],
         },
       ];
 
-      if (pParam.hasOwnProperty("initialreport_id")) {
-        if (pParam.initialreport_id != "") {
+      if (pParam.hasOwnProperty("audit_id")) {
+        if (pParam.audit_id != "") {
           xWhereAnd.push({
-            initialreport_id: pParam.initialreport_id,
+            audit_id: pParam.audit_id,
           });
         }
       }
 
-      // if (pParam.hasOwnProperty("keyword")) {
-      //   if (pParam.keyword != "") {
-      //     xWhereOr.push({
-      //       corrective_plan_desc: {
-      //         [Op.iLike]: "%" + pParam.keyword + "%",
-      //       },
-      //     });
-      //   }
-      // }
+      if (pParam.hasOwnProperty("area_id")) {
+        if (pParam.area_id != "") {
+          xWhereAnd.push({
+            area_id: pParam.area_id,
+          });
+        }
+      }
+
+      if (pParam.hasOwnProperty("scope_id")) {
+        if (pParam.scope_id != "") {
+          xWhereAnd.push({
+            scope_id: pParam.scope_id,
+          });
+        }
+      }
+
+      if (pParam.hasOwnProperty("keyword")) {
+        if (pParam.keyword != "") {
+          xWhereOr.push({
+            corrective_plan_desc: {
+              [Op.iLike]: "%" + pParam.keyword + "%",
+            },
+            description: {
+              [Op.iLike]: "%" + pParam.keyword + "%",
+            },
+          });
+        }
+      }
 
       if (xWhereAnd.length > 0) {
         xWhere.push({
@@ -182,80 +227,6 @@ class PersonInvolveRepo {
     return xJoResult;
   }
 
-  async getByParam(pParam) {
-    var xInclude = [];
-    var xWhereOr = [];
-    var xWhereAnd = [];
-    var xWhere = [];
-    var xAttributes = [];
-    var xJoResult = {};
-
-    try {
-      xInclude = [
-        {
-          model: _modelIntialReport,
-          as: "initial_report",
-          attributes: ["document_no", "status"],
-        },
-      ];
-
-      if (pParam.hasOwnProperty("id")) {
-        if (pParam.id != "") {
-          xWhereAnd.push({
-            id: pParam.id,
-          });
-        }
-      }
-
-      if (pParam.hasOwnProperty("initialreport_id")) {
-        if (pParam.initialreport_id != "") {
-          xWhereAnd.push({
-            initialreport_id: pParam.initialreport_id,
-          });
-        }
-      }
-
-      if (xWhereAnd.length > 0) {
-        xWhere.push({
-          [Op.and]: xWhereAnd,
-        });
-      }
-
-      var xData = await _modelDb.findOne({
-        where: xWhere,
-        include: xInclude,
-        // subQuery: false
-      });
-      // console.log(`>>> xData: ${JSON.stringify(xData)}`);
-
-      if (xData) {
-        xJoResult = {
-          status_code: "00",
-          status_msg: "OK",
-          data: xData,
-        };
-      } else {
-        xJoResult = {
-          status_code: "-99",
-          status_msg: "Data not found",
-        };
-      }
-    } catch (e) {
-      _utilInstance.writeLog(
-        `${_xClassName}.getById`,
-        `Exception error: ${e.message}`,
-        "error"
-      );
-
-      xJoResult = {
-        status_code: "-99",
-        status_msg: `Failed get data. Error : ${e.message}`,
-      };
-    }
-
-    return xJoResult;
-  }
-
   async delete(pParam) {
     let xTransaction;
     var xJoResult = {};
@@ -297,4 +268,4 @@ class PersonInvolveRepo {
   }
 }
 
-module.exports = PersonInvolveRepo;
+module.exports = DiscoveryItemRepository;

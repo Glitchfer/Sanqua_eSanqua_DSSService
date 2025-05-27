@@ -44,7 +44,7 @@ class PersonInvolveService {
     try {
       xFlagProcess = false;
 
-      if (xAct == "add") {
+      if (xAct == "add" || xAct == "add_batch") {
         if (pParam.hasOwnProperty("logged_user_id") && pParam.hasOwnProperty("initialreport_id")) {
           if (pParam.logged_user_id != "" && pParam.initialreport_id != "") {
             xDecId = await _utilInstance.decrypt(
@@ -79,8 +79,34 @@ class PersonInvolveService {
             let xDetail = await _initialReportRepo.getByParam({id: pParam.initialreport_id});
             if (xDetail.status_code == "00") {
               if (xDetail.data.status == 0) {
-                let xAddResult = await _repoInstance.save(pParam, xAct);
-                xJoResult = xAddResult;
+                if (xAct == "add_batch") {
+                  if (pParam.hasOwnProperty('items')) {
+                    var xItems = pParam.items;
+                    var arrMsg = [];
+                    for (var i in xItems) {
+                      xItems[i].initialreport_id = pParam.initialreport_id;
+                      var xAddResult = await _repoInstance.save(xItems[i], 'add');
+                      arrMsg.push({
+                        index: i,
+                        status_code: xAddResult.status_code,
+                        status_msg: xAddResult.status_msg
+                      });
+                    }
+                    xJoResult = {
+                      status_code: "00",
+                      status_msg: "Save data success",
+                      data: arrMsg
+                    };
+                  } else {
+                    xJoResult = {
+                      status_code: "-99",
+                      status_msg: "Add data failed, invalid items parameter"
+                    };
+                  }
+                } else {
+                  xJoResult = await _repoInstance.save(pParam, xAct);
+                }
+                // xJoResult = xAddResult;
               } else {
                 xJoResult = {
                   status_code: "-99",
@@ -138,7 +164,7 @@ class PersonInvolveService {
 
         if (xFlagProcess) {
           // check is document already processd or not
-          var xGetDataById = await _repoInstance.getById(pParam);
+          var xGetDataById = await _repoInstance.getByParam(pParam);
           // console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
           if (xGetDataById.status_code == "00") {
             if (xGetDataById.data.initial_report.status == 0) {

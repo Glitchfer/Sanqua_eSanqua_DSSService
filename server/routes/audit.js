@@ -307,4 +307,88 @@ module.exports = (app) => {
     arrValidate,
     _auditController.memberDelete
   );
+
+  // -----------DISCOVERY ITEMS-------------------
+  arrValidate = [];
+  arrValidate = [
+    check("limit", "Parameter limit can not be empty and must be integer")
+      .not()
+      .isEmpty()
+      .isInt(),
+    check("offset", "Parameter offset can not be empty and must be integer")
+      .not()
+      .isEmpty()
+      .isInt(),
+    check("audit_id", "Parameter offset can not be empty and must be integer")
+      .not()
+      .isEmpty(),
+  ];
+  app.get(
+    _rootAPIPath + "/discoveryitem/list",
+    arrValidate,
+    _auditController.discoveryitemList
+  );
+
+  arrValidate = [];
+  arrValidate = [
+    check("act")
+      .not()
+      .isEmpty()
+      .withMessage("Parameter action can not be empty"),
+  ];
+  app.post(
+    _rootAPIPath + "/discoveryitem/save",
+    arrValidate,
+    _auditController.discoveryitemSave
+  );
+
+  arrValidate = [];
+  arrValidate = [
+    check("id").not().isEmpty().withMessage("Parameter id can not be empty"),
+  ];
+  app.delete(
+    _rootAPIPath + "/discoveryitem/delete/:id",
+    arrValidate,
+    _auditController.discoveryitemDelete
+  );
+
+  arrValidate = [];
+  arrValidate = [
+    check("id").not().isEmpty().withMessage("Parameter id cannot be empty"),
+    check("objective_evidence")
+      .optional()
+      .isArray()
+      .withMessage(
+        "Parameter objective_evidence must be array and cannot be empty"
+      ),
+
+    check("corrective_evidence")
+      .optional()
+      .isArray()
+      .withMessage(
+        "Parameter corrective_evidence must be array and cannot be empty"
+      ),
+
+    check("objective_evidence").custom((value, { req }) => {
+      if (!value && !req.body.corrective_evidence) {
+        throw new Error(
+          "At least one field (objective_evidence or corrective_evidence) is required."
+        );
+      }
+      return true;
+    }),
+    check("corrective_evidence").custom((value, { req }) => {
+      if (!value && !req.body.objective_evidence) {
+        throw new Error(
+          "At least one field (objective_evidence or corrective_evidence) is required."
+        );
+      }
+      return true;
+    }),
+  ];
+  app.post(
+    _rootAPIPath + "/discoveryitem/update_file_upload",
+    arrValidate,
+    _auditController.discoveryitemFileUpload
+  );
 };

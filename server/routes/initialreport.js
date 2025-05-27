@@ -26,7 +26,7 @@ module.exports = (app) => {
 		check('act').not().isEmpty().withMessage('Parameter action can not be empty'),
 		check('company_id', 'Parameter company_id can not be empty and must be integer').not().isEmpty().isInt(),
 		check('company_name').not().isEmpty().withMessage('Parameter company_name can not be empty'),
-		check('incident_date_time').not().isEmpty().withMessage('Parameter incident_date can not be empty'),
+		check('incident_date_time').not().isEmpty().withMessage('Parameter incident_date_time can not be empty'),
 		check('incident_location').not().isEmpty().withMessage('Parameter incident_location can not be empty'),
 		check('chronology').not().isEmpty().withMessage('Parameter chronology can not be empty')
 	];
@@ -34,7 +34,19 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	arrValidate = [
-		check('limit', 'Parameter limit can not be empty and must be integer').not().isEmpty().isInt(),
+		check('limit')
+		.not().isEmpty().withMessage('Parameter limit can not be empty')
+		.custom((value) => {
+			if (isNaN(value)) {
+				// Jika bukan angka, pastikan itu string yang diizinkan
+				if (typeof value === 'string' && value.trim().length > 0) {
+					// Misalnya izinkan nilai seperti 'all', 'unlimited', dsb
+					return true;
+				}
+				throw new Error('Parameter limit must be a valid integer or string');
+			}
+			return true;
+		}),
 		check('offset', 'Parameter offset can not be empty and must be integer').not().isEmpty().isInt()
 	];
 	app.get(_rootAPIPath + '/list', arrValidate, _initialReport.list);

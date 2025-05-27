@@ -47,16 +47,14 @@ class LeadingReportService {
       );
 
       if (xLevel) {
-        if (
-          pParam.hasOwnProperty("logged_user_id")
-        ) {
+        if (pParam.hasOwnProperty("logged_user_id")) {
           if (pParam.logged_user_id != "") {
             xLogId = await _utilInstance.decrypt(
               pParam.logged_user_id,
               config.cryptoKey.hashKey
             );
             if (xLogId.status_code == "00") {
-              pParam.logged_user_id = xLogId.decrypted
+              pParam.logged_user_id = xLogId.decrypted;
               xFlagProcess = true;
             } else {
               xJoResult = xLogId;
@@ -124,9 +122,7 @@ class LeadingReportService {
             }
           }
         } else if (xAct == "update") {
-          if (
-            pParam.hasOwnProperty("id")
-          ) {
+          if (pParam.hasOwnProperty("id")) {
             if (pParam.id != "") {
               xDecId = await _utilInstance.decrypt(
                 pParam.id,
@@ -155,19 +151,22 @@ class LeadingReportService {
 
           if (xFlagProcess) {
             // check is document already processd or not
-            var xGetDataById = await _repoInstance.getByParam({id: pParam.id});
-            console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
+            var xGetDataById = await _repoInstance.getByParam({
+              id: pParam.id,
+            });
+            // console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
             if (xGetDataById.status_code == "00") {
-              if (xGetDataById.data.status == 0) {
-                var xAddResult = await _repoInstance.save(pParam, xAct);
+              // if (xGetDataById.data.status == 0) {
+              // console.log(`pParam>>>>>>: ${JSON.stringify(pParam)}`, xAct);
+              var xAddResult = await _repoInstance.save(pParam, xAct);
 
-                xJoResult = xAddResult;
-              } else {
-                xJoResult = {
-                  status_code: "-99",
-                  status_msg: "Document already processed, edit failed !!",
-                };
-              }
+              xJoResult = xAddResult;
+              // } else {
+              //   xJoResult = {
+              //     status_code: "-99",
+              //     status_msg: "Document already processed, edit failed !!",
+              //   };
+              // }
             } else {
               xJoResult = xGetDataById;
             }
@@ -250,8 +249,9 @@ class LeadingReportService {
                 company_name: xRows[index].company_name,
                 leading_date: xRows[index].leading_date,
                 leading: xRows[index].leading,
-                // description: xRows[index].description,
-                // file: xRows[index].file,
+                description: xRows[index].description,
+                file: xRows[index].file,
+                total_participant: xRows[index].total_participant,
                 status:
                   xRows[index].status != null
                     ? {
@@ -347,7 +347,7 @@ class LeadingReportService {
       }
 
       if (xFlagProcess) {
-        let xDetail = await _repoInstance.getByParam({id: pParam.id});
+        let xDetail = await _repoInstance.getByParam({ id: pParam.id });
         console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
 
         if (xDetail) {
@@ -362,16 +362,16 @@ class LeadingReportService {
                 id: xDetail.data.company_id,
                 name: xDetail.data.company_name,
               },
-              leading_date:  xDetail.data.leading_date,
-              leading:  xDetail.data.leading,
-              description:  xDetail.data.description,
-              file:  xDetail.data.file,
+              leading_date: xDetail.data.leading_date,
+              leading: xDetail.data.leading,
+              description: xDetail.data.description,
+              file: xDetail.data.file,
               status:
-                 xDetail.data.status != null
+                xDetail.data.status != null
                   ? {
-                      id:  xDetail.data.status,
+                      id: xDetail.data.status,
                       name: config.statusDescription.leadingReport[
-                         xDetail.data.status
+                        xDetail.data.status
                       ],
                     }
                   : null,
@@ -442,7 +442,11 @@ class LeadingReportService {
     var xStatusDocument = 1;
 
     try {
-      console.log(`>>> pParam.logged_user_level : ${JSON.stringify(pParam.logged_user_level)}`);
+      console.log(
+        `>>> pParam.logged_user_level : ${JSON.stringify(
+          pParam.logged_user_level
+        )}`
+      );
       let xLevel = pParam.logged_user_level.find(
         (el) =>
           el.application.id == config.applicationId || el.application.id == 1
@@ -465,7 +469,7 @@ class LeadingReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -493,7 +497,7 @@ class LeadingReportService {
       }
 
       if (xFlagProcess) {
-        let xDocDetail = await _repoInstance.getByParam({id: pParam.id});
+        let xDocDetail = await _repoInstance.getByParam({ id: pParam.id });
 
         if (xDocDetail.status_code == "00") {
           // Check if document owned by logged_employee_id
@@ -573,7 +577,7 @@ class LeadingReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -601,7 +605,7 @@ class LeadingReportService {
       }
 
       if (xFlagProcess) {
-        let xDetail = await _repoInstance.getByParam({id: pParam.id});
+        let xDetail = await _repoInstance.getByParam({ id: pParam.id });
         // console.log(`>>> xDetail: ${JSON.stringify(xDetail.data.employee_id)}, ${JSON.stringify(pParam.logged_user_id)}, ${JSON.stringify(pParam.is_admin)}`);
         if (xDetail.status_code == "00") {
           let xParamUpdate = {
@@ -683,7 +687,7 @@ class LeadingReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -711,7 +715,7 @@ class LeadingReportService {
       }
 
       if (xFlagProcess) {
-        let xDetail = await _repoInstance.getByParam({id: pParam.id});
+        let xDetail = await _repoInstance.getByParam({ id: pParam.id });
         if (xDetail.status_code == "00") {
           if (xDetail.data.created_by == pParam.logged_user_id) {
             if (xDetail.data.status == 2) {
@@ -754,7 +758,7 @@ class LeadingReportService {
 
     return xJoResult;
   }
-  
+
   async delete(pParam) {
     var xJoResult;
     var xDecId = null;
@@ -782,7 +786,7 @@ class LeadingReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -824,7 +828,6 @@ class LeadingReportService {
             status_msg: `xFlagProcess <${_xClassName}.delete>: Delete Failed`,
           };
         }
-
       } else {
         xJoResult = {
           status_code: "-99",

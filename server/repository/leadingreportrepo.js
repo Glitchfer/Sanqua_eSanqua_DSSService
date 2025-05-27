@@ -69,20 +69,28 @@ class LeadingReportRepo {
 
       if (pParam.hasOwnProperty("keyword")) {
         if (pParam.keyword != "") {
-          xWhereOr.push({
-            description: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
+          xWhereOr.push(
+            {
+              description: {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              }
             },
-            document_no: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
+            {
+              document_no: {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              }
             },
-            company_name: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
+            {
+              company_name: {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              }
             },
-            '$leading.name$': {
-              [Op.iLike]: "%" + pParam.keyword + "%",
+            {
+              '$leading.name$': {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              }
             }
-          });
+          );
         }
       }
 

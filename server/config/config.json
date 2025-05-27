@@ -98,5 +98,104 @@
         "performanceReport": "tr_performancereports"
       }
     }
+  },
+  "development": {
+    "appPort": 5190,
+    "applicationId": 23,
+    "applicationCode": "DSS",
+    "username": "postgres",
+    "password": "P455uu0rd^^ok",
+    "database": "sanqua_dssdb",
+    "host": "10.10.20.5",
+    "port": 5432,
+    "dialect": "postgres",
+    "dialectOptions": {
+      "dateStrings": true,
+      "typeCast": true,
+      "useUTC": false,
+      "charset": "utf8mb4_unicode_ci"
+    },
+    "timezone": "Asia/Jakarta",
+    "secret": "yZh7fv62xLshZmt8LuSlI9RmstrdQ0nE",
+
+    "cryptoKey": {
+      "md5Key": "4B1C9E44D769C429",
+      "hashKey": "51beba089ef1612152be4933ea6a9a48"
+    },
+
+    "frontParam": {
+      "separatorData": "Þ"
+    },
+    "imagePath": "http://10.10.20.8:8020/assets/icon/",
+    "imagePathESanQua": "http://10.10.20.8:8020",
+    "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
+    "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
+
+    "api": {
+      "oAuth": {
+        "url": {
+          "base": "http://localhost:9189/api/oauth/v1",
+          "verifyToken": "http://localhost:9189/api/oauth/v1/user/verify_token",
+          "approval_matrix_document": {
+            "save": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save",
+            "list": "http://localhost:9189/api/oauth/v1/approval_matrix/document/list",
+            "confirm": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm",
+            "confirm_via_email": "http://localhost:9189/api/oauth/v1/approval_matrix/document/confirm_via_email",
+            "save_manual": "http://localhost:9189/api/oauth/v1/approval_matrix/document/save_manual"
+          },
+          "userInfo": "http://localhost:9189/api/oauth/v1/user/e/"
+        }
+      },
+      "hr": {
+        "url": {
+          "employeeInfo": "http://localhost:7190/api/hr/v1/employee"
+        }
+      },
+
+      "catalogue": "http://localhost:9191/",
+      "eSanqua": "http://localhost:2193/api/esanqua/v1",
+
+      "logging": {
+        "url": "http://localhost:8191/api/esanqua/log/v1/hris"
+      }
+    },
+    "fileBasePath": "/var/www/sqa_upload_ecatalogue/dss",
+    "fileUrl": "https://dev-esanqua.sanquawater.co.id/image/ecatalogue/dss",
+    "hqId": 6,
+    "source": ["portal", "esanqua"],
+    "statusDescription": {
+      "auditDocument": [
+        "Draft",
+        "Waiting Approval",
+        "In Progress",
+        "Done",
+        "Cancel",
+        "Reject"
+      ],
+      "auditItemScore": [
+        "Draft",
+        "In Progress",
+        "Verified",
+        "Cancel",
+        "Unused"
+      ],
+      "performanceReport": [
+        "Draft",
+        "Waiting Approval",
+        "Done",
+        "Cancel",
+        "Reject"
+      ],
+      "initialReport": ["Draft", "Submitted", "Cancel"],
+      "inspectionReport": ["Draft", "Submitted", "Cancel"],
+      "rootCauseReport": ["Draft", "Submitted", "Cancel"],
+      "leadingReport": ["Draft", "Submitted", "Cancel"]
+    },
+    "approvalMatrixConfig": {
+      "tableName": {
+        "auditDocument": "tr_audits",
+        "performanceReport": "tr_performancereports"
+      }
+    }
   }
 }

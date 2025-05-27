@@ -18,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     incident_location: DataTypes.STRING,
     status: DataTypes.INTEGER,
     cancel_note: DataTypes.STRING,
+    cause: DataTypes.STRING,
+    reported_by: DataTypes.STRING,
     // is_delete: DataTypes.INTEGER,
     // deletedAt: {
     //   type: DataTypes.DATE,

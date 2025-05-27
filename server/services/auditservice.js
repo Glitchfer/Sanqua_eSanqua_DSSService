@@ -328,6 +328,7 @@ class AuditService {
   }
 
   async getById(pParam) {
+    
     var xJoResult = {};
     var xFlagProcess = false;
     var xDecId = null;
@@ -522,20 +523,25 @@ class AuditService {
                 });
               }
             }
-
+            
             // show auditScoreResult for 5r
             if (
               xDetail.data.audit_type != null &&
               xDetail.data.audit_type.id == 2
             ) {
               // get scoring klausul
-              const xGetAuditScoreResult = await this.calculateResultV4(
+              const xGetAuditScoreResult = await this.calculateResultV5(
                 xDetailItemData,
                 xDetailMember
               );
-              for (let i = 0; i < xGetAuditScoreResult.length; i++) {
-                const xTotal = xGetAuditScoreResult[i].total
-                xAuditScoreTotal = xAuditScoreTotal + xTotal
+              if (xGetAuditScoreResult != null && xGetAuditScoreResult != undefined) {
+                for (let i = 0; i < xGetAuditScoreResult.length; i++) {
+                  const xTotal = xGetAuditScoreResult[i].total
+                  xAuditScoreTotal = xAuditScoreTotal + xTotal
+                }
+
+                xAuditScoreTotal = xAuditScoreTotal / xGetAuditScoreResult.length
+                xAuditScoreTotal =  parseFloat(xAuditScoreTotal.toFixed(2))
               }
 
               // get check grade base on score result
@@ -546,24 +552,32 @@ class AuditService {
               if (xGetGrade != null) {
                 if (xGetGrade.status_code == '00') {
                   const xGradeList = xGetGrade.data
-                  const grade = xGradeList.find(g => xAuditScoreTotal >= g.start_value && xAuditScoreTotal <= g.end_value);
+                  let grade = null
                   // console.log(`>>> xGradeList : ${JSON.stringify(xGradeList)}`);
-                  xAuditScoreGrade = {
-                    // id: await _utilInstance.encrypt(
-                    //   grade.id.toString(),
-                    //   config.cryptoKey.hashKey
-                    // ),
+                  for (let i = 0; i < xGradeList.length; i++) {
+                    var item = xGradeList[i];
+                    const start = Number(item.start_value);
+                    const end = Number(item.end_value);
+                    // console.log(`xGradeList[${i}], start: ${start}, end: ${end}`, xAuditScoreTotal >= start, xAuditScoreTotal <= end);
+                    if (xAuditScoreTotal >= start && xAuditScoreTotal < end + 1) {
+                      grade = item;
+                      break;
+                    }
+                  }
+                  console.log(`>>> grade : ${JSON.stringify(grade)}`);
+                  // grade = xGradeList.find(g => xAuditScoreTotal >= g.start_value && xAuditScoreTotal <= g.end_value);
+                  xAuditScoreGrade = grade != null ? {
                     name: grade.name,
                     start_value: grade.start_value,
                     end_value: grade.end_value,
-                  }
+                  } : null
                 }
               }
 
               xAuditScoreResult = xGetAuditScoreResult;
             }
 
-            console.log(`>>> xAuditItemDetail : ${JSON.stringify(xAuditItemDetail)}`);
+            // console.log(`>>> xAuditItemDetail : ${JSON.stringify(xAuditItemDetail)}`);
             xJoData = {
               id: await _utilInstance.encrypt(
                 xDetail.data.id.toString(),
@@ -893,7 +907,7 @@ class AuditService {
             cancel_by_name: pParam.logged_user_name,
             status: 4,
           };
-          console.log(`>>> pParam cancel : ${JSON.stringify(pParam.is_admin)}`);
+          // console.log(`>>> pParam cancel : ${JSON.stringify(pParam.is_admin)}`);
           // cannot cancel if status already finish
           if (xDetail.data.status != 3) {
             // check if item status there are already processed
@@ -907,9 +921,9 @@ class AuditService {
               xGetItemList.rows.find(
                 ({ status }) => status == 1 || status == 2 //status progress and verified
               ) != undefined;
-            console.log(
-              `>>> xCheckItemAudit : ${JSON.stringify(xCheckItemAudit)}`
-            );
+            // console.log(
+            //   `>>> xCheckItemAudit : ${JSON.stringify(xCheckItemAudit)}`
+            // );
             if (!xCheckItemAudit) {
               if (
                 xDetail.data.created_by == pParam.logged_user_id ||
@@ -1226,7 +1240,7 @@ class AuditService {
         xFlagProcess = false;
 
         let xDetail = await _repoInstance.getById(pParam);
-        console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+        // console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
         if (xDetail.status_code == "00") {
           // if (xFlagProcess) {
           if (xDetail.data.status == 1) {
@@ -1497,7 +1511,7 @@ class AuditService {
       if (xFlagProcess) {
         // Get PR Detail
         var xDocDetail = await _repoInstance.getById({ id: xClearId });
-        console.log(`>>> xDocDetail: ${JSON.stringify(xDocDetail)}`);
+        // console.log(`>>> xDocDetail: ${JSON.stringify(xDocDetail)}`);
         if (xDocDetail != null) {
           if (xDocDetail.status_code == "00") {
             if (
@@ -1598,154 +1612,13 @@ class AuditService {
     }
     return xJoResult;
   }
-
-  async calculateResultV1(item) {
-    const data = item;
-    const result = {};
-
-    data.forEach((item) => {
-      const area = item.area.name;
-      const category = item.clause_category_name.toLowerCase();
-      const score = item.score_value;
-
-      if (!result[area]) {
-        result[area] = {
-          area,
-          ringkas: 0,
-          rapih: 0,
-          rajin: 0,
-          resik: 0,
-          rawat: 0,
-          scores: [],
-        };
-      }
-
-      // Tambahkan skor ke kategori yang sesuai
-      if (["ringkas", "rapih", "rajin", "resik", "rawat"].includes(category)) {
-        result[area][category] += score;
-      }
-
-      // Simpan semua skor untuk hitung rata-rata
-      result[area].scores.push(score);
-    });
-
-    // Format akhir
-    const finalOutput = Object.values(result).map((entry) => {
-      const total =
-        entry.scores.reduce((a, b) => a + b, 0) / entry.scores.length;
-      return {
-        area: entry.area,
-        ringkas: entry.ringkas,
-        rajin: entry.rajin,
-        resik: entry.resik,
-        rawat: entry.rawat,
-        rapih: entry.rapih,
-        total: parseFloat(total.toFixed(2)),
-      };
-    });
-
-    console.log("finalOutput>>>", finalOutput);
-    return null;
-  }
-
-  async calculateResultV2(item) {
-    const data = item;
-    // Gunakan object sebagai map untuk kombinasi area+category
-    const map = {};
-
-    data.forEach((item) => {
-      const area = item.area.name;
-      const category = item.clause_category_name;
-      const key = `${area}__${category}`;
-      const score = item.score_value;
-
-      if (!map[key]) {
-        map[key] = { area, category, total: 0 };
-      }
-
-      map[key].total += score;
-    });
-
-    // Konversi hasil akhir ke array
-    const result = Object.values(map);
-
-    console.log("output v2>>>", result);
-    return null;
-  }
-  async calculateResultV3(data, member) {
-    console.log(`>>> member: ${JSON.stringify(member)}`);
-    const grouped = member.map((m) => {
-      // Filter data berdasarkan area_ids milik member
-      const memberData = data.filter((d) => m.area_ids.includes(d.area.id));
-
-      console.log(`>>> memberData: ${JSON.stringify(memberData)}`);
-      // Kelompokkan berdasarkan kategori → area
-      const categoryMap = {};
-
-      memberData.forEach((item) => {
-        const category = item.clause_category_name;
-        const area = item.area.name;
-
-        if (!categoryMap[category]) {
-          categoryMap[category] = {};
-        }
-
-        if (!categoryMap[category][area]) {
-          categoryMap[category][area] = [];
-        }
-
-        categoryMap[category][area].push(item);
-      });
-
-      // Ubah ke array dan hitung total
-      const categories = Object.entries(categoryMap)
-        .map(([category, areasObj]) => {
-          const areas = Object.entries(areasObj)
-            .map(([area, items]) => {
-              const total = items.reduce((sum, i) => sum + i.score_value, 0);
-              const avg = total / items.length;
-              return {
-                area,
-                items,
-                total_per_area: total,
-                average_per_area: parseFloat(avg.toFixed(2)),
-              };
-            })
-            .sort((a, b) => b.total_per_area - a.total_per_area); // Sort area by total descending
-
-          const total_category = areas.reduce(
-            (sum, a) => sum + a.total_per_area,
-            0
-          );
-          const count_category = areas.reduce(
-            (sum, a) => sum + a.items.length,
-            0
-          );
-          const avg_category = total_category / count_category;
-          return {
-            category,
-            areas,
-            total_per_category: total_category,
-            average_per_category: parseFloat(avg_category.toFixed(2)),
-          };
-        })
-        .sort((a, b) => b.total_per_category - a.total_per_category); // Sort category by total descending
-
-      return {
-        employee_name: m.employee_name,
-        categories,
-      };
-    });
-
-    for (let i = 0; i < grouped.length; i++) {
-      if (grouped[i].employee_name == "Rolan Trigara") {
-        console.log(`>>> grouped: ${JSON.stringify(grouped[i])}`);
-      }
-    }
-  }
   async calculateResultV4(data, member) {
     const grouped = member.map((m) => {
-      const memberData = data.filter((d) => m.area_ids.includes(d.area.id));
+      const memberAreas = m.area_ids;
+      const memberData = data.filter(item =>
+        memberAreas.includes(item.area.id) && item.status !== 3 // <-- ini kuncinya
+      );
+      // const memberData = data.filter((d) => m.area_ids.includes(d.area.id));
 
       const categoryMap = {};
 
@@ -1814,6 +1687,86 @@ class AuditService {
     //     console.log(`>>> grouped: ${JSON.stringify(grouped[i])}`);
     //   }
     // }
+    return grouped;
+  }
+  async calculateResultV5(data, member) {
+    const grouped = member.map((m) => {
+      const memberAreas = m.area_ids;
+      const memberData = data.filter(item =>
+        memberAreas.includes(item.area.id) && item.status !== 3 // <-- ini kuncinya
+      );
+      // const memberData = data.filter((d) => m.area_ids.includes(d.area.id));
+
+      const categoryMap = {};
+
+      // Group by category -> clause_id
+      memberData.forEach((item) => {
+        const categoryKey = item.clause_category_id;
+        const clauseKey = item.clause_id;
+
+        if (!categoryMap[categoryKey]) {
+          categoryMap[categoryKey] = {
+            category: item.clause_category_name,
+            category_id: item.clause_category_id,
+            clauses: {},
+          };
+        }
+
+        if (!categoryMap[categoryKey].clauses[clauseKey]) {
+          categoryMap[categoryKey].clauses[clauseKey] = [];
+        }
+
+        let score = 0;
+        if (typeof item.score_value !== 'undefined' && item.score_value !== null) {
+          score = item.score_value;
+        } else if (item.score && typeof item.score.value !== 'undefined') {
+          score = item.score.value;
+        }
+
+        const multiplier = item.score_multiplier != null ? item.score_multiplier : 1
+        categoryMap[categoryKey].clauses[clauseKey].push(score * multiplier);
+      });
+
+      const categories = Object.values(categoryMap).map(
+        ({ category, category_id, clauses }) => {
+          const clauseAverages = Object.values(clauses).map((scores) => {
+            const avg = scores.reduce((sum, val) => sum + val, 0) / scores.length;
+            return avg;
+          });
+
+          const total_per_category = clauseAverages.reduce(
+            (sum, val) => sum + val,
+            0
+          );
+          const average_per_category =
+            clauseAverages.length > 0
+              ? total_per_category / clauseAverages.length
+              : 0;
+
+          return {
+            category,
+            category_id,
+            total_per_category: parseFloat(total_per_category.toFixed(2)),
+            average_per_category: parseFloat(average_per_category.toFixed(2)),
+          };
+        }
+      );
+      // console.log(`>>> memberData: ${JSON.stringify(categoryMap)}`);
+      const grand_total = categories.reduce(
+        (sum, c) => sum + c.total_per_category,
+        0
+      );
+      return {
+        employee_name: m.employee_name,
+        employee_id: m.employee_id,
+        employee_code: m.employee_code,
+        categories: categories.sort(
+          (a, b) => b.total_per_category - a.total_per_category
+        ),
+        total: parseFloat(grand_total.toFixed(2)),
+      };
+    });
+
     return grouped;
   }
 }

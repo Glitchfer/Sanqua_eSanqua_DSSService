@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     person_type: DataTypes.INTEGER, //1: Worker, 2: Visitor
     engagement_type: DataTypes.INTEGER, //1: Korban, 2: Saksi
     employee_leader_id: DataTypes.INTEGER,
+    employee_leader_name: DataTypes.INTEGER,
     injured_category_id: DataTypes.INTEGER,
     injured_body_part_id: DataTypes.INTEGER,
     machine_used: DataTypes.STRING,
@@ -53,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "injured_category_id",
       as: "injured_category",
     });
-    
+
     PersonInvolve.belongsTo(models.ms_bodyparts, {
       foreignKey: "injured_body_part_id",
       as: "body_part",

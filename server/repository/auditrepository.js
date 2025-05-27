@@ -372,7 +372,7 @@ class AuditRepository {
         include: xInclude,
         // subQuery: false
       });
-      console.log(`>>> xData: ${JSON.stringify(xData)}`);
+      // console.log(`>>> xData: ${JSON.stringify(xData)}`);
 
       if (xData) {
         xJoResult = {
@@ -453,13 +453,13 @@ class AuditRepository {
                 "created_by": ${pParam.logged_user_id},
                 "created_by_name": "${pParam.logged_user_name}"
             }'::json);`;
-      console.log("SQL_FUNCTION>>>>>", xSql);
+      // console.log("SQL_FUNCTION>>>>>", xSql);
 
       var xDtQuery = await sequelize.query(xSql, {
         type: sequelize.QueryTypes.SELECT,
       });
 
-      console.log(`>>> xDtQuery: ${JSON.stringify(xDtQuery)}`);
+      // console.log(`>>> xDtQuery: ${JSON.stringify(xDtQuery)}`);
       if (xDtQuery.length > 0) {
         if (xDtQuery[0].func_generate_form_audit.status_code == "00") {
           xJoResult = {

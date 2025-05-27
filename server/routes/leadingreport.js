@@ -32,7 +32,19 @@ module.exports = (app) => {
 
 	arrValidate = [];
 	arrValidate = [
-		check('limit', 'Parameter limit can not be empty and must be integer').not().isEmpty().isInt(),
+		check('limit')
+		.not().isEmpty().withMessage('Parameter limit can not be empty')
+		.custom((value) => {
+			if (isNaN(value)) {
+				// Jika bukan angka, pastikan itu string yang diizinkan
+				if (typeof value === 'string' && value.trim().length > 0) {
+					// Misalnya izinkan nilai seperti 'all', 'unlimited', dsb
+					return true;
+				}
+				throw new Error('Parameter limit must be a valid integer or string');
+			}
+			return true;
+		}),
 		check('offset', 'Parameter offset can not be empty and must be integer').not().isEmpty().isInt()
 	];
 	app.get(_rootAPIPath + '/list', arrValidate, _leadingReport.list);

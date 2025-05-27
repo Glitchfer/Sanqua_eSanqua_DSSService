@@ -15,6 +15,8 @@ const _modelDb = require("../models").tr_initialreports;
 const _modelPersonInvolve = require("../models").tr_personinvolves;
 const _modelInjuredCategory = require("../models").ms_injuredcategories;
 const _modelBodyPart = require("../models").ms_bodyparts;
+const _modelInspection = require("../models").tr_inspections;
+const _modelRootProblem = require("../models").tr_rootproblems;
 
 const Utility = require("peters-globallib-v2");
 const _utilInstance = new Utility();
@@ -48,38 +50,21 @@ class InitialReportRepository {
               as: "body_part",
               attributes: ["id", "name"],
             },
-          ]
+          ],
           // attributes: ["id", "name"],
         },
-        // {
-        //   model: _modelFormTemplateItem,
-        //   as: "form_template_item",
-        //   attributes: ["id"],
-        //   include: [
-        //     {
-        //       model: _modelClause,
-        //       as: "clause",
-        //       attributes: ["id", "description", "clause_no", "reference"],
-        //       include: [
-        //         {
-        //           model: _modelClauseCategory,
-        //           as: "clause_category",
-        //           attributes: ["id", "name"],
-        //         },
-        //       ],
-        //     },
-        //     {
-        //       model: _modelArea,
-        //       as: "area",
-        //       attributes: ["id", "name"],
-        //     },
-        //     {
-        //       model: _modelScope,
-        //       as: "scope",
-        //       attributes: ["id", "name"],
-        //     },
-        //   ],
-        // },
+        {
+          model: _modelInspection,
+          as: "inspection",
+          include: [],
+          attributes: ["id", "document_no"],
+        },
+        {
+          model: _modelRootProblem,
+          as: "root_problem",
+          include: [],
+          attributes: ["id", "document_no"],
+        },
       ];
 
       xWhereAnd.push({
@@ -138,21 +123,18 @@ class InitialReportRepository {
 
     try {
       xInclude = [
-        // {
-        //   model: _modelPersonInvolve,
-        //   as: "person"
-        //   // attributes: ["id", "name"],
-        // },
-        // {
-        //   model: _modelInjuredCategory,
-        //   as: "injured_category",
-        //   attributes: ["id", "name"],
-        // },
-        // {
-        //   model: _modelBodyPart,
-        //   as: "body_part",
-        //   attributes: ["id", "name"],
-        // },
+        {
+          model: _modelInspection,
+          as: "inspection",
+          include: [],
+          attributes: ["id", "document_no"],
+        },
+        {
+          model: _modelRootProblem,
+          as: "root_problem",
+          include: [],
+          attributes: ["id", "document_no"],
+        },
       ];
 
       if (pParam.hasOwnProperty("company_id")) {
@@ -171,29 +153,67 @@ class InitialReportRepository {
         }
       }
 
-			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
-				if (pParam.start_date != '' && pParam.end_date != '') {
-					xWhereAnd.push({
-						incident_date: {
-							[Op.between]: [ pParam.start_date + ' 00:00:00', pParam.end_date + ' 23:59:59' ]
-						}
-					});
-				}
-			}
+      if (
+        pParam.hasOwnProperty("start_date") &&
+        pParam.hasOwnProperty("end_date")
+      ) {
+        if (pParam.start_date != "" && pParam.end_date != "") {
+          xWhereAnd.push({
+            incident_date: {
+              [Op.between]: [
+                pParam.start_date + " 00:00:00",
+                pParam.end_date + " 23:59:59",
+              ],
+            },
+          });
+        }
+      }
+      if (pParam.hasOwnProperty("filter")) {
+        if (
+          pParam.filter != null &&
+          pParam.filter != undefined &&
+          pParam.filter != ""
+        ) {
+          var xFilter = JSON.parse(pParam.filter);
+          if (xFilter.length > 0) {
+            for (var index in xFilter) {
+              // var objProperty = Object.getOwnPropertyNames(xFilter[index])[0];
+              xWhereAnd.push(xFilter[index]);
+              // if (objProperty.includes("_ids")) {
+              //   xWhereAnd.push({
+              //     [objProperty]: {
+              //       [Op.contains]: Sequelize.literal(
+              //         `ARRAY[${xFilter[index][objProperty]}]`
+              //       ),
+              //     },
+              //   });
+              // } else {
+              //   xWhereAnd.push(xFilter[index]);
+              // }
+            }
+          }
+        }
+      }
 
       if (pParam.hasOwnProperty("keyword")) {
         if (pParam.keyword != "") {
-          xWhereOr.push({
-            chronology: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
+          xWhereOr.push(
+            {
+              chronology: {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              },
             },
-            document_no: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
+            {
+              document_no: {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              },
             },
-            incident_location: {
-              [Op.iLike]: "%" + pParam.keyword + "%",
-            },
-          });
+            {
+              incident_location: {
+                [Op.iLike]: "%" + pParam.keyword + "%",
+              },
+            }
+          );
         }
       }
 
@@ -264,14 +284,23 @@ class InitialReportRepository {
     let xTransaction;
     var xSaved = null;
     var xJoinedTable = [];
+    var xInclude = null;
 
     try {
       var xSaved = null;
       xTransaction = await sequelize.transaction();
       xJoinedTable = {};
+      xInclude = {
+        include: [
+          {
+            model: _modelPersonInvolve,
+            as: "person_involve",
+          },
+        ],
+      };
 
-      if (pAct == "add") {
-        xSaved = await _modelDb.create(pParam, xJoinedTable, {
+      if (pAct == "add" || pAct == "add_batch") {
+        xSaved = await _modelDb.create(pParam, xInclude, {
           transaction: xTransaction,
         });
         if (xSaved.id != null) {
@@ -302,6 +331,11 @@ class InitialReportRepository {
         xJoResult = {
           status_code: "00",
           status_msg: "Data has been successfully updated",
+        };
+      } else {
+        xJoResult = {
+          status_code: "-99",
+          status_msg: "Invalid Action",
         };
       }
     } catch (e) {
@@ -337,7 +371,7 @@ class InitialReportRepository {
             as: "body_part",
             attributes: ["id", "name"],
           },
-        ]
+        ],
         // attributes: ["id", "name"],
       },
     ];
@@ -348,7 +382,7 @@ class InitialReportRepository {
     var xJoResult = {};
 
     try {
-      xInclude = [];
+      // xInclude = [];
 
       if (pParam.hasOwnProperty("id")) {
         if (pParam.id != "") {
@@ -377,7 +411,7 @@ class InitialReportRepository {
         include: xInclude,
         // subQuery: false
       });
-      console.log(`>>> xData: ${JSON.stringify(xData)}`);
+      // console.log(`>>> xData: ${JSON.stringify(xData)}`);
 
       if (xData) {
         xJoResult = {
@@ -439,7 +473,7 @@ class InitialReportRepository {
       if (xTransaction) await xTransaction.rollback();
       xJoResult = {
         status_code: "-99",
-        status_msg: "Failed save or update data",
+        status_msg: `Failed, ${e.message}`,
         err_msg: e,
       };
 

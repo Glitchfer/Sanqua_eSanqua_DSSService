@@ -113,13 +113,41 @@ class PerformanceReportRepo {
         // }
       ];
 
-      if (pParam.hasOwnProperty("company_id")) {
-        if (pParam.company_id != "") {
-          xWhereAnd.push({
-            '$initial_report.company_id$': pParam.company_id,
-          });
+      if (pParam.hasOwnProperty("filter")) {
+        if (
+          pParam.filter != null &&
+          pParam.filter != undefined &&
+          pParam.filter != ""
+        ) {
+          var xFilter = JSON.parse(pParam.filter);
+          // console.log(`xFilter ${JSON.stringify(xFilter)}`);
+          if (xFilter.length > 0) {
+            // xWhereAnd.push( pParam.filter );
+            for (var index in xFilter) {
+              var objProperty = Object.getOwnPropertyNames(xFilter[index])[0];
+              if (objProperty.includes("_ids")) {
+                xWhereAnd.push({
+                  [objProperty]: {
+                    [Op.contains]: Sequelize.literal(
+                      `ARRAY[${xFilter[index][objProperty]}]`
+                    ),
+                  },
+                });
+              } else {
+                xWhereAnd.push(xFilter[index]);
+              }
+            }
+          }
         }
       }
+
+      // if (pParam.hasOwnProperty("company_id")) {
+      //   if (pParam.company_id != "") {
+      //     xWhereAnd.push({
+      //       '$initial_report.company_id$': pParam.company_id,
+      //     });
+      //   }
+      // }
 
 			if (pParam.hasOwnProperty('start_date') && pParam.hasOwnProperty('end_date')) {
 				if (pParam.start_date != '' && pParam.end_date != '') {

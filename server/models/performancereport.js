@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     report_date: DataTypes.DATE,
     pic_id: DataTypes.INTEGER,
     pic_name: DataTypes.STRING,
+    pic_nik: DataTypes.STRING,
     total_employee: DataTypes.DOUBLE,
     total_other_people: DataTypes.DOUBLE,
     workdays: DataTypes.INTEGER,

@@ -42,7 +42,7 @@ class InitialReportService {
     try {
       xFlagProcess = false;
 
-      if (xAct == "add") {
+      if (xAct == "add" || xAct == "add_batch") {
         if (pParam.hasOwnProperty("logged_user_id")) {
           if (pParam.logged_user_id != "") {
             var xLogId = await _utilInstance.decrypt(
@@ -71,12 +71,14 @@ class InitialReportService {
                 : null;
 
             pParam.incident_date =
-              pParam.incident_date_time != null && pParam.incident_date_time != ""
+              pParam.incident_date_time != null &&
+              pParam.incident_date_time != ""
                 ? moment(pParam.incident_date_time).format("YYYY-MM-DD")
                 : null;
 
             pParam.incident_time =
-              pParam.incident_date_time != null && pParam.incident_date_time != ""
+              pParam.incident_date_time != null &&
+              pParam.incident_date_time != ""
                 ? moment(pParam.incident_date_time).format("hh:mm:ss")
                 : null;
 
@@ -261,6 +263,10 @@ class InitialReportService {
                 incident_time: xRows[index].incident_time,
                 incident_location: xRows[index].incident_location,
                 reported_date: xRows[index].reported_date,
+                reported_by: xRows[index].reported_by,
+                cause: xRows[index].cause,
+                inspection_report: xRows[index].inspection,
+                root_problem_report: xRows[index].root_problem,
                 // chronology: xRows[index].chronology,
                 // file: xRows[index].file,
 
@@ -348,40 +354,56 @@ class InitialReportService {
 
       if (xFlagProcess) {
         var xPersonInvolves = [];
+        var xTotalVictim = 0;
         let xDetail = await _repoInstance.getById(pParam);
-        // console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
+        console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
 
         if (xDetail) {
           if (xDetail.status_code == "00") {
             const xPersonResult = xDetail.data.person_involve;
+            console.log(`>>> xPersonResult : ${JSON.stringify(xPersonResult)}`);
             if (xPersonResult != null) {
               for (let i = 0; i < xPersonResult.length; i++) {
+                if (xPersonResult[i].engagement_type != null) {
+                  if (xPersonResult[i].engagement_type == 1) {
+                    xTotalVictim++;
+                  }
+                }
                 xPersonInvolves.push({
                   id: await _utilInstance.encrypt(
-                  xPersonResult[i].id.toString(),
+                    xPersonResult[i].id.toString(),
                     config.cryptoKey.hashKey
                   ),
                   // audit:xPersonResult[i].audit,
-                  name:xPersonResult[i].name,
-                  gender:xPersonResult[i].gender,
-                  no_identitas:xPersonResult[i].no_identitas,
-                  birth_date:xPersonResult[i].birth_date,
-                  person_type:xPersonResult[i].person_type,
-                  injured_category:xPersonResult[i].injured_category,
-                  injured_body_part:xPersonResult[i].injured_body_part,
-                  machine_used:xPersonResult[i].machine_used,
-                  amount_loss:xPersonResult[i].amount_loss,
-                  rehabilitation_days:xPersonResult[i].rehabilitation_days,
-                  created_by_name:xPersonResult[i].created_by_name,
+                  name: xPersonResult[i].name,
+                  gender: xPersonResult[i].gender,
+                  no_identitas: xPersonResult[i].no_identitas,
+                  birth_date: xPersonResult[i].birth_date,
+                  person_type: xPersonResult[i].person_type,
+                  employee_leader_id: xPersonResult[i].employee_leader_id,
+                  employee_leader_name: xPersonResult[i].employee_leader_name,
+                  injured_category: xPersonResult[i].injured_category,
+                  injured_body_part: xPersonResult[i].injured_body_part,
+                  machine_used: xPersonResult[i].machine_used,
+                  amount_loss: xPersonResult[i].amount_loss,
+                  rehabilitation_days: xPersonResult[i].rehabilitation_days,
+                  // cause: xPersonResult[i].cause,
+                  engagement_type: xPersonResult[i].engagement_type,
+                  body_part: xPersonResult[i].body_part,
+                  created_by_name: xPersonResult[i].created_by_name,
                   created_at:
-                  xPersonResult[i].createdAt != null
-                      ? moment(xDetail.data.createdAt).format("DD-MM-YYYY HH:mm:ss")
+                    xPersonResult[i].createdAt != null
+                      ? moment(xDetail.data.createdAt).format(
+                          "DD-MM-YYYY HH:mm:ss"
+                        )
                       : null,
-                  updated_by_name:xPersonResult[i].updated_by_name,
+                  updated_by_name: xPersonResult[i].updated_by_name,
                   updated_at:
-                  xPersonResult[i].updatedAt != null
-                      ? moment(xDetail.data.updatedAt).format("DD-MM-YYYY HH:mm:ss")
-                      : null
+                    xPersonResult[i].updatedAt != null
+                      ? moment(xDetail.data.updatedAt).format(
+                          "DD-MM-YYYY HH:mm:ss"
+                        )
+                      : null,
                 });
               }
             }
@@ -396,7 +418,10 @@ class InitialReportService {
               incident_time: xDetail.data.incident_time,
               incident_location: xDetail.data.incident_location,
               reported_date: xDetail.data.reported_date,
+              reported_by: xDetail.data.reported_by,
+              cause: xDetail.data.cause,
               file: xDetail.data.file,
+              total_victim: xTotalVictim,
               status:
                 xDetail.data.status != null
                   ? {
@@ -412,6 +437,8 @@ class InitialReportService {
               },
               chronology: xDetail.data.chronology,
               person_involve: xPersonInvolves,
+              inspection_report: xDetail.data.inspection,
+              root_problem_report: xDetail.data.root_problem,
               cancel_note: xDetail.data.cancel_note,
               created_by_name: xDetail.data.created_by_name,
               created_by: xDetail.data.created_by,
@@ -501,7 +528,7 @@ class InitialReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -608,7 +635,7 @@ class InitialReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -717,7 +744,7 @@ class InitialReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -788,7 +815,7 @@ class InitialReportService {
 
     return xJoResult;
   }
-  
+
   async delete(pParam) {
     var xJoResult;
     var xDecId = null;
@@ -816,7 +843,7 @@ class InitialReportService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -839,10 +866,22 @@ class InitialReportService {
 
         if (xFlagProcess) {
           let xDetail = await _repoInstance.getByParam(pParam);
+          console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
           if (xDetail.status_code == "00") {
             if (xDetail.data.status != 1) {
-              var xDeleteResult = await _repoInstance.delete(pParam);
-              xJoResult = xDeleteResult;
+              if (
+                xDetail.data.person_involve != null &&
+                xDetail.data.person_involve.length > 0
+              ) {
+                xJoResult = {
+                  status_code: "-99",
+                  status_msg:
+                    "Delete failed, this data already processed and linked to another data.",
+                };
+              } else {
+                var xDeleteResult = await _repoInstance.delete(pParam);
+                xJoResult = xDeleteResult;
+              }
             } else {
               xJoResult = {
                 status_code: "-99",
@@ -858,7 +897,6 @@ class InitialReportService {
             status_msg: `xFlagProcess <${_xClassName}.delete>: Delete Failed`,
           };
         }
-
       } else {
         xJoResult = {
           status_code: "-99",
