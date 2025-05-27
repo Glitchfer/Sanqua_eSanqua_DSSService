@@ -564,7 +564,7 @@ class AuditService {
                       break;
                     }
                   }
-                  console.log(`>>> grade : ${JSON.stringify(grade)}`);
+                  // console.log(`>>> grade : ${JSON.stringify(grade)}`);
                   // grade = xGradeList.find(g => xAuditScoreTotal >= g.start_value && xAuditScoreTotal <= g.end_value);
                   xAuditScoreGrade = grade != null ? {
                     name: grade.name,
