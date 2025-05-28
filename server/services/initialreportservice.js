@@ -354,6 +354,8 @@ class InitialReportService {
 
       if (xFlagProcess) {
         var xPersonInvolves = [];
+        var xInspectionReport = null;
+        var xRootProblemReport = null;
         var xTotalVictim = 0;
         let xDetail = await _repoInstance.getById(pParam);
         console.log(`>>> xDetail : ${JSON.stringify(xDetail)}`);
@@ -361,7 +363,7 @@ class InitialReportService {
         if (xDetail) {
           if (xDetail.status_code == "00") {
             const xPersonResult = xDetail.data.person_involve;
-            console.log(`>>> xPersonResult : ${JSON.stringify(xPersonResult)}`);
+            // console.log(`>>> xPersonResult : ${JSON.stringify(xPersonResult)}`);
             if (xPersonResult != null) {
               for (let i = 0; i < xPersonResult.length; i++) {
                 if (xPersonResult[i].engagement_type != null) {
@@ -407,6 +409,26 @@ class InitialReportService {
                 });
               }
             }
+            if (xDetail.data.inspection != null) {
+              xInspectionReport = {
+                id: await _utilInstance.encrypt(
+                  xDetail.data.inspection.id.toString(),
+                  config.cryptoKey.hashKey
+                ),
+                document_no: xDetail.data.inspection.document_no,
+                status: xDetail.data.inspection.status,
+              };
+            }
+            if (xDetail.data.root_problem != null) {
+              xRootProblemReport = {
+                id: await _utilInstance.encrypt(
+                  xDetail.data.root_problem.id.toString(),
+                  config.cryptoKey.hashKey
+                ),
+                document_no: xDetail.data.root_problem.document_no,
+                status: xDetail.data.root_problem.status,
+              };
+            }
 
             xJoData = {
               id: await _utilInstance.encrypt(
@@ -437,8 +459,8 @@ class InitialReportService {
               },
               chronology: xDetail.data.chronology,
               person_involve: xPersonInvolves,
-              inspection_report: xDetail.data.inspection,
-              root_problem_report: xDetail.data.root_problem,
+              inspection_report: xInspectionReport,
+              root_problem_report: xRootProblemReport,
               cancel_note: xDetail.data.cancel_note,
               created_by_name: xDetail.data.created_by_name,
               created_by: xDetail.data.created_by,

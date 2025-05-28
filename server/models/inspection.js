@@ -26,6 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     file: DataTypes.JSON,
     document_no: DataTypes.STRING,
     cancel_note: DataTypes.STRING,
+    total_working_hours: DataTypes.STRING,
+    total_missing_hours: DataTypes.STRING,
     // is_delete: DataTypes.INTEGER,
     // deletedAt: {
     //   type: DataTypes.DATE,
@@ -46,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
       field: "updated_at",
     },
     updated_by: DataTypes.INTEGER,
-    updated_by_name: DataTypes.STRING
+    updated_by_name: DataTypes.STRING,
   });
 
   Inspection.associate = function (models) {
@@ -54,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "inspection_id",
       as: "accident_item_desc",
     });
-    
+
     Inspection.hasMany(models.tr_damagedobjects, {
       foreignKey: "inspection_id",
       as: "damaged_object",

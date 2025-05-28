@@ -138,22 +138,22 @@ class AccidentItemDescService {
 
         if (xFlagProcess) {
           // check is document already processd or not
-          var xGetDataById = await _repoInstance.getById(pParam);
+          // var xGetDataById = await _inspectionRepo.getById(pParam);
           // console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
-          if (xGetDataById.status_code == "00") {
-            if (xGetDataById.data.inspection.status == 0) {
-              var xAddResult = await _repoInstance.save(pParam, xAct);
+          // if (xGetDataById.status_code == "00") {
+            // if (xGetDataById.data.inspection.status == 0) {
+          var xAddResult = await _repoInstance.save(pParam, xAct);
 
-              xJoResult = xAddResult;
-            } else {
-              xJoResult = {
-                status_code: "-99",
-                status_msg: "Document already processed, edit failed !!",
-              };
-            }
-          } else {
-            xJoResult = xGetDataById;
-          }
+          xJoResult = xAddResult;
+            // } else {
+            //   xJoResult = {
+            //     status_code: "-99",
+            //     status_msg: "Document already processed, edit failed !!",
+            //   };
+            // }
+          // } else {
+          //   xJoResult = xGetDataById;
+          // }
         }
       } else {
         xJoResult = {

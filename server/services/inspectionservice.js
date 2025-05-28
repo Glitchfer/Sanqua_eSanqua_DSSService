@@ -49,16 +49,14 @@ class InspectionService {
       );
 
       if (xLevel) {
-        if (
-          pParam.hasOwnProperty("logged_user_id")
-        ) {
+        if (pParam.hasOwnProperty("logged_user_id")) {
           if (pParam.logged_user_id != "") {
             xLogId = await _utilInstance.decrypt(
               pParam.logged_user_id,
               config.cryptoKey.hashKey
             );
             if (xLogId.status_code == "00") {
-              pParam.logged_user_id = xLogId.decrypted
+              pParam.logged_user_id = xLogId.decrypted;
               xFlagProcess = true;
             } else {
               xJoResult = xLogId;
@@ -86,9 +84,7 @@ class InspectionService {
         xFlagProcess = false;
 
         if (xAct == "add") {
-          if (
-            pParam.hasOwnProperty("initialreport_id")
-          ) {
+          if (pParam.hasOwnProperty("initialreport_id")) {
             if (pParam.initialreport_id != "") {
               xDecId = await _utilInstance.decrypt(
                 pParam.initialreport_id,
@@ -116,27 +112,33 @@ class InspectionService {
           }
 
           if (xFlagProcess) {
-
-            if (
-              pParam.hasOwnProperty("investigation_date")
-            ) {
-              if (pParam.investigation_date != "" && pParam.investigation_date != null) {
-                pParam.investigation_date = moment(pParam.investigation_date).format("YYYY-MM-DD")
+            if (pParam.hasOwnProperty("investigation_date")) {
+              if (
+                pParam.investigation_date != "" &&
+                pParam.investigation_date != null
+              ) {
+                pParam.investigation_date = moment(
+                  pParam.investigation_date
+                ).format("YYYY-MM-DD");
               }
             }
 
-            if (
-              pParam.hasOwnProperty("corrective_action_due_date")
-            ) {
-              if (pParam.corrective_action_due_date != "" && pParam.corrective_action_due_date != null) {
-                pParam.corrective_action_due_date = moment(pParam.corrective_action_due_date).format("YYYY-MM-DD")
+            if (pParam.hasOwnProperty("corrective_action_due_date")) {
+              if (
+                pParam.corrective_action_due_date != "" &&
+                pParam.corrective_action_due_date != null
+              ) {
+                pParam.corrective_action_due_date = moment(
+                  pParam.corrective_action_due_date
+                ).format("YYYY-MM-DD");
               }
             }
 
-            var xGetInitialReport = await _initialReportRepo.getById({id: pParam.initialreport_id});
+            var xGetInitialReport = await _initialReportRepo.getById({
+              id: pParam.initialreport_id,
+            });
             // console.log(`xGetInitialReport>>>>>>: ${JSON.stringify(xGetInitialReport)}`);
             if (xGetInitialReport.status_code == "00") {
-
               let xAddResult = await _repoInstance.save(pParam, xAct);
               // if success generate request number
               if (xAddResult.status_code == "00") {
@@ -165,15 +167,12 @@ class InspectionService {
               } else {
                 xJoResult = xAddResult;
               }
-              
             } else {
               xJoResult = xGetInitialReport;
             }
           }
         } else if (xAct == "update") {
-          if (
-            pParam.hasOwnProperty("id")
-          ) {
+          if (pParam.hasOwnProperty("id")) {
             if (pParam.id != "") {
               xDecId = await _utilInstance.decrypt(
                 pParam.id,
@@ -202,7 +201,7 @@ class InspectionService {
 
           if (xFlagProcess) {
             // check is document already processd or not
-            var xGetDataById = await _repoInstance.getById({id: pParam.id});
+            var xGetDataById = await _repoInstance.getById({ id: pParam.id });
             console.log(`xGetDataById>>>>>>: ${JSON.stringify(xGetDataById)}`);
             if (xGetDataById.status_code == "00") {
               if (xGetDataById.data.status == 0) {
@@ -292,10 +291,13 @@ class InspectionService {
                   config.cryptoKey.hashKey
                 ),
                 document_no: xRows[index].document_no,
-                initial_report: xRows[index].initial_report,
+                initialreport: xRows[index].initial_report,
                 investigation_date: xRows[index].investigation_date,
                 accident_classification: xRows[index].accident_classification,
-                corrective_action_due_date: xRows[index].corrective_action_due_date,
+                total_working_hours: xRows[index].total_working_hours,
+                total_missing_hours: xRows[index].total_missing_hours,
+                corrective_action_due_date:
+                  xRows[index].corrective_action_due_date,
                 status:
                   xRows[index].status != null
                     ? {
@@ -404,12 +406,12 @@ class InspectionService {
               for (let i = 0; i < xAccidentItem.length; i++) {
                 xAccidentItemDesc.push({
                   id: await _utilInstance.encrypt(
-                  xAccidentItem[i].id.toString(),
+                    xAccidentItem[i].id.toString(),
                     config.cryptoKey.hashKey
                   ),
                   // audit:xAccidentItem[i].audit,
-                  description:xAccidentItem[i].description,
-                  desc_category:xAccidentItem[i].desc_category
+                  description: xAccidentItem[i].description,
+                  desc_category: xAccidentItem[i].desc_category,
                   // created_by_name:xAccidentItem[i].created_by_name,
                   // created_at:
                   // xAccidentItem[i].createdAt != null
@@ -427,15 +429,15 @@ class InspectionService {
               for (let i = 0; i < xDamagedObjectList.length; i++) {
                 xDamagedObject.push({
                   id: await _utilInstance.encrypt(
-                  xDamagedObjectList[i].id.toString(),
+                    xDamagedObjectList[i].id.toString(),
                     config.cryptoKey.hashKey
                   ),
-                  name:xDamagedObjectList[i].name,
-                  object_category:xDamagedObjectList[i].object_category,
-                  qty:xDamagedObjectList[i].qty,
-                  uom_name:xDamagedObjectList[i].uom_name,
-                  uom_id:xDamagedObjectList[i].uom_id,
-                  description:xDamagedObjectList[i].description
+                  name: xDamagedObjectList[i].name,
+                  object_category: xDamagedObjectList[i].object_category,
+                  qty: xDamagedObjectList[i].qty,
+                  uom_name: xDamagedObjectList[i].uom_name,
+                  uom_id: xDamagedObjectList[i].uom_id,
+                  description: xDamagedObjectList[i].description,
                   // created_by_name:xDamagedObjectList[i].created_by_name,
                   // created_at:
                   // xDamagedObjectList[i].createdAt != null
@@ -456,7 +458,7 @@ class InspectionService {
                 config.cryptoKey.hashKey
               ),
               document_no: xDetail.data.document_no,
-              initial_report: xDetail.data.initial_report,
+              initialreport: xDetail.data.initial_report,
               accident_classification: xDetail.data.accident_classification,
               investigation_date: xDetail.data.investigation_date,
               has_p2k3: xDetail.data.has_p2k3,
@@ -466,11 +468,15 @@ class InspectionService {
               danger_action: xDetail.data.danger_action,
               accident_source: xDetail.data.accident_source,
               accident_type: xDetail.data.accident_type,
-              existing_function_protection: xDetail.data.existing_function_protection,
+              existing_function_protection:
+                xDetail.data.existing_function_protection,
               dangerous_process_desc: xDetail.data.dangerous_process_desc,
               conclusion: xDetail.data.conclusion,
-              corrective_action_due_date: xDetail.data.corrective_action_due_date,
+              corrective_action_due_date:
+                xDetail.data.corrective_action_due_date,
               corrective_action_desc: xDetail.data.corrective_action_desc,
+              total_working_hours: xDetail.data.total_working_hours,
+              total_missing_hours: xDetail.data.total_missing_hours,
               accident_item_desc: xAccidentItemDesc,
               damaged_object: xDamagedObject,
               file: xDetail.data.file,
@@ -571,7 +577,7 @@ class InspectionService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -679,7 +685,7 @@ class InspectionService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -789,7 +795,7 @@ class InspectionService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -860,7 +866,7 @@ class InspectionService {
 
     return xJoResult;
   }
-  
+
   async delete(pParam) {
     var xJoResult;
     var xDecId = null;
@@ -888,7 +894,7 @@ class InspectionService {
                 config.cryptoKey.hashKey
               );
               if (xLogId.status_code == "00") {
-                pParam.logged_user_id = xLogId.decrypted
+                pParam.logged_user_id = xLogId.decrypted;
                 xFlagProcess = true;
               } else {
                 xJoResult = xLogId;
@@ -930,7 +936,6 @@ class InspectionService {
             status_msg: `xFlagProcess <${_xClassName}.delete>: Delete Failed`,
           };
         }
-
       } else {
         xJoResult = {
           status_code: "-99",

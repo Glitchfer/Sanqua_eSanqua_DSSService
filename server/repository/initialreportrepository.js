@@ -57,13 +57,13 @@ class InitialReportRepository {
           model: _modelInspection,
           as: "inspection",
           include: [],
-          attributes: ["id", "document_no"],
+          attributes: ["id", "document_no", "status"],
         },
         {
           model: _modelRootProblem,
           as: "root_problem",
           include: [],
-          attributes: ["id", "document_no"],
+          attributes: ["id", "document_no", "status"],
         },
       ];
 
@@ -127,13 +127,13 @@ class InitialReportRepository {
           model: _modelInspection,
           as: "inspection",
           include: [],
-          attributes: ["id", "document_no"],
+          attributes: ["id", "document_no", "status"],
         },
         {
           model: _modelRootProblem,
           as: "root_problem",
           include: [],
-          attributes: ["id", "document_no"],
+          attributes: ["id", "document_no", "status"],
         },
       ];
 
