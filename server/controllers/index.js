@@ -10,6 +10,7 @@ const damagedobject = require("./damagedobject");
 const rootproblem = require("./rootproblem");
 const rootcausedesc = require("./rootcausedesc");
 const performancereport = require("./performancereport");
+const upload = require("./upload");
 
 module.exports = {
   master,
@@ -23,5 +24,6 @@ module.exports = {
   damagedobject,
   rootproblem,
   rootcausedesc,
-  performancereport
+  performancereport,
+  upload
 };

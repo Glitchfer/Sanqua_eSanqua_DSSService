@@ -45,11 +45,11 @@ class InitialReportRepository {
               as: "injured_category",
               attributes: ["id", "name"],
             },
-            {
-              model: _modelBodyPart,
-              as: "body_part",
-              attributes: ["id", "name"],
-            },
+            // {
+            //   model: _modelBodyPart,
+            //   as: "body_part",
+            //   attributes: ["id", "name"],
+            // },
           ],
           // attributes: ["id", "name"],
         },
@@ -366,11 +366,11 @@ class InitialReportRepository {
             as: "injured_category",
             attributes: ["id", "name"],
           },
-          {
-            model: _modelBodyPart,
-            as: "body_part",
-            attributes: ["id", "name"],
-          },
+          // {
+          //   model: _modelBodyPart,
+          //   as: "body_part",
+          //   attributes: ["id", "name"],
+          // },
         ],
         // attributes: ["id", "name"],
       },

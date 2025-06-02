@@ -31,7 +31,21 @@ class PersonInvolveRepo {
       var xSaved = null;
       xTransaction = await sequelize.transaction();
       xJoinedTable = {};
-
+      if (pParam.hasOwnProperty("injured_body_part_id")) {
+        if (
+          pParam.injured_body_part_id != null &&
+          pParam.injured_body_part_id.length > 0
+        ) {
+          // for (let i = 0; i < pParam.injured_body_part_id.length; i++) {
+          // }
+          pParam.injured_body_part_id = Sequelize.literal(
+            `ARRAY[${pParam.injured_body_part_id.join(",")}]`
+          );
+        } else {
+          pParam.injured_body_part_id = null;
+        }
+      }
+      console.log(`>>> Save xData: ${JSON.stringify(pParam)}`);
       if (pAct == "add") {
         xSaved = await _modelDb.create(pParam, xJoinedTable, {
           transaction: xTransaction,

@@ -55,10 +55,10 @@ module.exports = (sequelize, DataTypes) => {
       as: "injured_category",
     });
 
-    PersonInvolve.belongsTo(models.ms_bodyparts, {
-      foreignKey: "injured_body_part_id",
-      as: "body_part",
-    });
+    // PersonInvolve.belongsTo(models.ms_bodyparts, {
+    //   foreignKey: "injured_body_part_id",
+    //   as: "body_part",
+    // });
   };
 
   return PersonInvolve;

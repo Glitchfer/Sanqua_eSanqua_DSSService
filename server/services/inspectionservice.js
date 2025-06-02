@@ -402,6 +402,7 @@ class InspectionService {
           if (xDetail.status_code == "00") {
             const xAccidentItem = xDetail.data.accident_item_desc;
             const xDamagedObjectList = xDetail.data.damaged_object;
+            let xFile = [];
             if (xAccidentItem != null) {
               for (let i = 0; i < xAccidentItem.length; i++) {
                 xAccidentItemDesc.push({
@@ -451,7 +452,15 @@ class InspectionService {
                 });
               }
             }
-
+            for (var i in xDetail.data.file) {
+              xFile.push({
+                subject: xDetail.data.file[i].subject,
+                file:
+                  xDetail.data.file[i].file != null
+                    ? `${config.imagePathESanQua}/dss/k3/${xDetail.data.file[i].file}`
+                    : null,
+              });
+            }
             xJoData = {
               id: await _utilInstance.encrypt(
                 xDetail.data.id.toString(),
@@ -479,7 +488,7 @@ class InspectionService {
               total_missing_hours: xDetail.data.total_missing_hours,
               accident_item_desc: xAccidentItemDesc,
               damaged_object: xDamagedObject,
-              file: xDetail.data.file,
+              file: xFile,
               status:
                 xDetail.data.status != null
                   ? {

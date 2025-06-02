@@ -385,13 +385,13 @@ class InitialReportService {
                   employee_leader_id: xPersonResult[i].employee_leader_id,
                   employee_leader_name: xPersonResult[i].employee_leader_name,
                   injured_category: xPersonResult[i].injured_category,
-                  injured_body_part: xPersonResult[i].injured_body_part,
+                  injured_body_part_id: xPersonResult[i].injured_body_part_id,
                   machine_used: xPersonResult[i].machine_used,
                   amount_loss: xPersonResult[i].amount_loss,
                   rehabilitation_days: xPersonResult[i].rehabilitation_days,
                   // cause: xPersonResult[i].cause,
                   engagement_type: xPersonResult[i].engagement_type,
-                  body_part: xPersonResult[i].body_part,
+                  // body_part: xPersonResult[i].body_part,
                   created_by_name: xPersonResult[i].created_by_name,
                   created_at:
                     xPersonResult[i].createdAt != null
