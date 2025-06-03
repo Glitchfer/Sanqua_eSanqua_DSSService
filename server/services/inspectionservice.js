@@ -461,6 +461,20 @@ class InspectionService {
                     : null,
               });
             }
+            // Get Approval matrix
+            var xParamApprovalMatrix = {
+              application_id: config.applicationId,
+              table_name:
+                config.approvalMatrixConfig.tableName.inspectionReport,
+              document_id: xEncId,
+            };
+            var xResultApprovalMatrix =
+              await _oAuthServiceInstance.getApprovalMatrix(
+                pParam.method,
+                pParam.token,
+                xParamApprovalMatrix
+              );
+
             xJoData = {
               id: await _utilInstance.encrypt(
                 xDetail.data.id.toString(),
@@ -493,10 +507,16 @@ class InspectionService {
                 xDetail.data.status != null
                   ? {
                       id: xDetail.data.status,
-                      name: config.statusDescription.initialReport[
+                      name: config.statusDescription.inspectionReport[
                         xDetail.data.status
                       ],
                     }
+                  : null,
+              approver_ids: xDetail.data.approver_ids,
+              approval_matrix:
+                xResultApprovalMatrix.status_code == "00" &&
+                xResultApprovalMatrix.token_data.status_code == "00"
+                  ? xResultApprovalMatrix.token_data.data
                   : null,
               created_by_name: xDetail.data.created_by_name,
               created_by: xDetail.data.created_by,
@@ -568,13 +588,14 @@ class InspectionService {
         (el) =>
           el.application.id == config.applicationId || el.application.id == 1
       );
-
+      
       if (xLevel) {
         if (
           pParam.hasOwnProperty("logged_user_id") &&
           pParam.hasOwnProperty("id")
         ) {
           if (pParam.logged_user_id != "" && pParam.id != "") {
+            xEncId = pParam.id;
             xDecId = await _utilInstance.decrypt(
               pParam.id,
               config.cryptoKey.hashKey
@@ -641,7 +662,73 @@ class InspectionService {
                 xParamUpdate,
                 "update"
               );
-              xJoResult = xResultUpdate;
+              if (xResultUpdate.status_code == "00") {
+                // Add Approval Matrix
+                var xParamAddApprovalMatrix = {
+                  act: "fetch_matrix",
+                  document_id: xEncId,
+                  document_no: xDocDetail.data.document_no,
+                  application_id: config.applicationId,
+                  table_name:
+                    config.approvalMatrixConfig.tableName.inspectionReport,
+                  company_id: xDocDetail.data.company_id,
+                  // department_id: xDocDetail.data.department_id,
+                };
+
+                console.log(`heree >>> 6 : ${JSON.stringify(xParamAddApprovalMatrix)}`);
+                var xApprovalMatrixResult =
+                  await _oAuthServiceInstance.addApprovalMatrix(
+                    pParam.method,
+                    pParam.token,
+                    xParamAddApprovalMatrix
+                  );
+                console.log(`heree >>> 7 : ${JSON.stringify(xApprovalMatrixResult)}`);
+                if (xApprovalMatrixResult.status_code == "00") {
+                  let xArrApprover = [];
+                  for (
+                    let i = 0;
+                    i < xApprovalMatrixResult.approvers.length;
+                    i++
+                  ) {
+                    for (
+                      let j = 0;
+                      j <
+                      xApprovalMatrixResult.approvers[i].approver_user.length;
+                      j++
+                    ) {
+                      xArrApprover.push(
+                        Number(
+                          xApprovalMatrixResult.approvers[i].approver_user[j]
+                            .employee_id
+                        )
+                      );
+                    }
+                  }
+
+                  let xParamUpdateApproverId = {
+                    id: xDocDetail.data.id,
+                    approver_ids: xArrApprover,
+                  };
+
+                  let xResultUpdateApproverId = await _repoInstance.save(
+                    xParamUpdateApproverId,
+                    "update"
+                  );
+
+                  xJoResult = xResultUpdate;
+                  xJoResult.approval_matrix_result = xApprovalMatrixResult;
+                } else {
+                  xParamUpdate.id = xDocDetail.data.id;
+                  xParamUpdate.status = 0;
+                  // xParamUpdate.submitedAt = null;
+                  // xParamUpdate.submited_by = null;
+                  // xParamUpdate.submited_by_name = null;
+                  await _repoInstance.save(xParamUpdate, "update");
+                  xJoResult = xApprovalMatrixResult;
+                }
+              } else {
+                xJoResult = xResultUpdate;
+              }
             }
           }
         } else {
@@ -669,7 +756,7 @@ class InspectionService {
     var xDecId = null;
     var xFlagProcess = false;
     var xEncId = "";
-    var xStatusDocument = 2;
+    var xStatusDocument = 3;
 
     try {
       let xLevel = pParam.logged_user_level.find(
@@ -735,7 +822,7 @@ class InspectionService {
           };
           // console.log(`>>> xParamUpdate : ${JSON.stringify(xParamUpdate)}`);
           // cannot cancel if status already finish
-          if (xDetail.data.status != 2) {
+          if (xDetail.data.status != 3) {
             if (pParam.is_admin == 1) {
               xJoResult = await _repoInstance.save(xParamUpdate, "update");
             } else {
@@ -835,7 +922,7 @@ class InspectionService {
         let xDetail = await _repoInstance.getById(pParam);
         if (xDetail.status_code == "00") {
           if (xDetail.data.created_by == pParam.logged_user_id) {
-            if (xDetail.data.status == 2) {
+            if (xDetail.data.status == 3 || xDetail.data.status == 4) {
               let xParamUpdate = {
                 id: pParam.id,
                 status: xStatusDocument,
@@ -961,6 +1048,251 @@ class InspectionService {
       xJoResult = {
         status_code: "-99",
         status_msg: `Exception error <${_xClassName}.delete>: ${e.message}`,
+      };
+    }
+
+    return xJoResult;
+  }
+  
+  async approve(pParam) {
+    var xJoResult;
+    var xDecId = null;
+    var xFlagProcess = false;
+    var xEncId = "";
+    var xStatusRequest = 2;
+
+    try {
+      if (pParam.hasOwnProperty("document_id")) {
+        if (pParam.document_id != "") {
+          xEncId = pParam.document_id;
+          xDecId = await _utilInstance.decrypt(
+            pParam.document_id,
+            config.cryptoKey.hashKey
+          );
+          if (xDecId.status_code == "00") {
+            pParam.id = xDecId.decrypted;
+            xDecId = await _utilInstance.decrypt(
+              pParam.logged_user_id,
+              config.cryptoKey.hashKey
+            );
+            if (xDecId.status_code == "00") {
+              pParam.logged_user_id = xDecId.decrypted;
+              xFlagProcess = true;
+            } else {
+              xJoResult = xDecId;
+            }
+          } else {
+            xJoResult = xDecId;
+          }
+        }
+      } else {
+        xJoResult = {
+          status_code: "-99",
+          status_msg: "Approve failed, param id not found",
+        };
+      }
+
+      if (xFlagProcess) {
+        xFlagProcess = false;
+
+        let xDetail = await _repoInstance.getById(pParam);
+        if (xDetail.status_code == "00") {
+          // if (xFlagProcess) {
+          if (xDetail.data.status == 1) {
+            var xParamApprovalMatrixDocument = {
+              document_id: xEncId,
+              status: 1,
+              application_id: config.applicationId,
+              table_name:
+                config.approvalMatrixConfig.tableName.inspectionReport,
+              note: pParam.note,
+            };
+
+            // console.log(`_____________>>> xParamApprovalMatrixDocument: ${JSON.stringify(xParamApprovalMatrixDocument)}`);
+            var xResultApprovalMatrixDocument =
+              await _oAuthServiceInstance.confirmApprovalMatrix(
+                pParam.method,
+                pParam.token,
+                xParamApprovalMatrixDocument
+              );
+            // console.log(`_____________>>> xResultApprovalMatrixDocument: ${JSON.stringify(xResultApprovalMatrixDocument)}`);
+
+            if (xResultApprovalMatrixDocument != null) {
+              if (xResultApprovalMatrixDocument.status_code == "00") {
+                if (
+                  xResultApprovalMatrixDocument.status_document_approved == true
+                ) {
+                  // ----------------------------
+                  let xParamUpdate = {
+                    id: xDetail.data.id,
+                    // confirmed_note: pParam.note,
+                    // confirmedAt: await _utilInstance.getCurrDateTime(),
+                    // confirmed_by: pParam.logged_user_id,
+                    // confirmed_by_name: pParam.logged_user_name,
+                    status: xStatusRequest,
+                  };
+                  xJoResult = await _repoInstance.save(xParamUpdate, "update");
+
+                  // -------------------------------------------------
+                } else {
+                  // Sort first
+                  xResultApprovalMatrixDocument.approvers =
+                    xResultApprovalMatrixDocument.approvers.sort((a, b) => {
+                      if (a.sequence < b.sequence) {
+                        return -1;
+                      }
+                    });
+
+                  xJoResult = {
+                    status_code: "00",
+                    status_msg:
+                      "Document successfully approved. Document available for next approver",
+                    result_approval_matrix: xResultApprovalMatrixDocument,
+                  };
+                }
+              } else {
+                xJoResult = xResultApprovalMatrixDocument;
+              }
+            } else {
+              xJoResult = {
+                status_code: "-99",
+                status_msg:
+                  "There is problem on approval matrix processing. Please try again",
+              };
+            }
+          } else {
+            xJoResult = {
+              status_code: "-99",
+              status_msg: "You cannot approve this document",
+            };
+          }
+          // }
+        } else {
+          xJoResult = xDetail;
+        }
+      } else {
+        xJoResult = xDecId;
+      }
+    } catch (e) {
+      _utilInstance.writeLog(
+        `${_xClassName}.approve`,
+        `Exception error: ${e.message}`,
+        "error"
+      );
+
+      xJoResult = {
+        status_code: "-99",
+        status_msg: `Exception error <${_xClassName}.approve>: ${e.message}`,
+      };
+    }
+
+    return xJoResult;
+  }
+
+  async reject(pParam) {
+    var xJoResult;
+    var xDecId = null;
+    var xFlagProcess = false;
+    var xEncId = "";
+    var xStatusRequest = 4;
+
+    try {
+      if (pParam.hasOwnProperty("document_id")) {
+        if (pParam.document_id != "") {
+          xEncId = pParam.document_id;
+          xDecId = await _utilInstance.decrypt(
+            pParam.document_id,
+            config.cryptoKey.hashKey
+          );
+          if (xDecId.status_code == "00") {
+            pParam.id = xDecId.decrypted;
+            xDecId = await _utilInstance.decrypt(
+              pParam.logged_user_id,
+              config.cryptoKey.hashKey
+            );
+            if (xDecId.status_code == "00") {
+              pParam.logged_user_id = xDecId.decrypted;
+              xFlagProcess = true;
+            } else {
+              xJoResult = xDecId;
+            }
+          } else {
+            xJoResult = xDecId;
+          }
+        }
+      } else {
+        xJoResult = {
+          status_code: "-99",
+          status_msg: "Reject failed, param id not found",
+        };
+      }
+
+      if (xFlagProcess) {
+        xFlagProcess = false;
+
+        let xDetail = await _repoInstance.getById(pParam);
+        console.log(`>>> xDetail: ${JSON.stringify(xDetail)}`);
+        if (xDetail.status_code == "00") {
+          // if (xFlagProcess) {
+          if (xDetail.data.status == 1) {
+            var xParamApprovalMatrixDocument = {
+              document_id: xEncId,
+              status: -1,
+              application_id: config.applicationId,
+              table_name:
+                config.approvalMatrixConfig.tableName.inspectionReport,
+              note: pParam.note,
+            };
+
+            var xResultApprovalMatrixDocument =
+              await _oAuthServiceInstance.confirmApprovalMatrix(
+                pParam.method,
+                pParam.token,
+                xParamApprovalMatrixDocument
+              );
+
+            if (xResultApprovalMatrixDocument != null) {
+              if (xResultApprovalMatrixDocument.status_code == "00") {
+                let xParamUpdate = {
+                  id: pParam.id,
+                  // confirmed_note: pParam.note,
+                  // confirmed_at: await _utilInstance.getCurrDateTime(),
+                  // confirmed_by: pParam.logged_user_id,
+                  // confirmed_by_name: pParam.logged_user_name,
+                  status: xStatusRequest,
+                };
+                xJoResult = await _repoInstance.save(xParamUpdate, "update");
+              } else {
+                xJoResult = xResultApprovalMatrixDocument;
+              }
+            } else {
+              xJoResult = {
+                status_code: "-99",
+                status_msg:
+                  "There is problem on approval matrix processing. Please try again",
+              };
+            }
+          } else {
+            xJoResult = {
+              status_code: "-99",
+              status_msg: "You cannot reject this document",
+            };
+          }
+          // }
+        } else {
+          xJoResult = xDetail;
+        }
+      }
+    } catch (e) {
+      _utilInstance.writeLog(
+        `${_xClassName}.reject`,
+        `Exception error: ${e.message}`,
+        "error"
+      );
+
+      xJoResult = {
+        status_code: "-99",
+        status_msg: `Exception error <${_xClassName}.approvalLeader>: ${e.message}`,
       };
     }
 

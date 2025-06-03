@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     cancel_note: DataTypes.STRING,
     total_working_hours: DataTypes.STRING,
     total_missing_hours: DataTypes.STRING,
+    approver_ids: DataTypes.JSONB,
     // is_delete: DataTypes.INTEGER,
     // deletedAt: {
     //   type: DataTypes.DATE,
@@ -49,6 +50,25 @@ module.exports = (sequelize, DataTypes) => {
     },
     updated_by: DataTypes.INTEGER,
     updated_by_name: DataTypes.STRING,
+    // submited_by: DataTypes.INTEGER,
+    // submited_by_name: DataTypes.STRING,
+    // submitedAt: {
+    //   type: DataTypes.DATE,
+    //   field: "submited_at",
+    // },
+    // cancel_by: DataTypes.INTEGER,
+    // cancel_by_name: DataTypes.STRING,
+    // cancelAt: {
+    //   type: DataTypes.DATE,
+    //   field: "cancel_at",
+    // },
+
+    // set_draft_by: DataTypes.INTEGER,
+    // set_draft_by_name: DataTypes.STRING,
+    // set_draftAt: {
+    //   type: DataTypes.DATE,
+    //   field: "set_draft_at",
+    // },
   });
 
   Inspection.associate = function (models) {

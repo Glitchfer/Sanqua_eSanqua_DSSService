@@ -77,4 +77,13 @@ module.exports = (app) => {
 	arrValidate = [];
 	arrValidate = [ check('id').not().isEmpty().withMessage('Parameter id can not be empty') ];
 	app.delete(_rootAPIPath + "/delete/:id", arrValidate, _inspection.deleteReport);
+	
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id can not be empty') ];
+	app.post(_rootAPIPath + "/approve", arrValidate, _inspection.approve);
+
+	arrValidate = [];
+	arrValidate = [ check('document_id').not().isEmpty().withMessage('Parameter document_id can not be empty') ];
+	app.post(_rootAPIPath + "/reject", arrValidate, _inspection.reject);
+
 };

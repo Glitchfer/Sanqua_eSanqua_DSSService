@@ -29,7 +29,7 @@
     },
     "imagePath": "http://10.10.20.8:8020/assets/icon/",
     "imagePathESanQua": "http://10.10.20.8:8020",
-    "imagePathESanQua_dev": "http://10.10.20.5:83/eprocurement",
+    "imagePathESanQua_dev": "http://localhost:83/eprocurement",
     "uploadBasePath": "/var/www/esanqua_upload/eprocurement",
 
     "api": {
@@ -88,14 +88,15 @@
         "Reject"
       ],
       "initialReport": ["Draft", "Submitted", "Cancel"],
-      "inspectionReport": ["Draft", "Submitted", "Cancel"],
+      "inspectionReport": ["Draft", "Waiting Approval", "Submitted", "Cancel", "Reject"],
       "rootCauseReport": ["Draft", "Submitted", "Cancel"],
       "leadingReport": ["Draft", "Submitted", "Cancel"]
     },
     "approvalMatrixConfig": {
       "tableName": {
         "auditDocument": "tr_audits",
-        "performanceReport": "tr_performancereports"
+        "performanceReport": "tr_performancereports",
+        "inspectionReport": "tr_inspections"
       }
     }
   },
@@ -187,14 +188,15 @@
         "Reject"
       ],
       "initialReport": ["Draft", "Submitted", "Cancel"],
-      "inspectionReport": ["Draft", "Submitted", "Cancel"],
+      "inspectionReport": ["Draft", "Waiting Approval", "Submitted", "Cancel", "Reject"],
       "rootCauseReport": ["Draft", "Submitted", "Cancel"],
       "leadingReport": ["Draft", "Submitted", "Cancel"]
     },
     "approvalMatrixConfig": {
       "tableName": {
         "auditDocument": "tr_audits",
-        "performanceReport": "tr_performancereports"
+        "performanceReport": "tr_performancereports",
+        "inspectionReport": "tr_inspections"
       }
     }
   }
