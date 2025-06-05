@@ -364,7 +364,6 @@ class AuditService {
           }
         }
       }
-
       if (xFlagProcess) {
         var xAuditItemDetail = [];
         var xAuditMember = [];
@@ -1696,7 +1695,6 @@ class AuditService {
         memberAreas.includes(item.area.id) && item.status !== 3 // <-- ini kuncinya
       );
       // const memberData = data.filter((d) => m.area_ids.includes(d.area.id));
-
       const categoryMap = {};
 
       // Group by category -> clause_id

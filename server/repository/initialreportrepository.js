@@ -300,6 +300,18 @@ class InitialReportRepository {
       };
 
       if (pAct == "add" || pAct == "add_batch") {
+        if (pParam.hasOwnProperty("person_involve") && pParam.person_involve != null && pParam.person_involve.length > 0) {
+          for (let i = 0; i < pParam.person_involve.length; i++) {
+            if (pParam.person_involve[i].injured_body_part_id != null && pParam.person_involve[i].injured_body_part_id.length > 0) {
+                pParam.person_involve[i].injured_body_part_id = Sequelize.literal(
+                  `ARRAY[${pParam.person_involve[i].injured_body_part_id.join(",")}]`
+                );
+              } else {
+                pParam.person_involve[i].injured_body_part_id = null;
+              }
+          }
+        }
+
         xSaved = await _modelDb.create(pParam, xInclude, {
           transaction: xTransaction,
         });
